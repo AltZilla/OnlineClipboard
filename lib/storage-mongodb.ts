@@ -48,7 +48,7 @@ export async function getClipboard(id: string): Promise<ClipboardData | null> {
     return {
       id: clipboard.id,
       content: clipboard.content,
-      files: clipboard.files.map(file => ({
+      files: clipboard.files.map((file: IClipboardFile) => ({
         filename: file.filename,
         originalName: file.originalName,
         size: file.size,
