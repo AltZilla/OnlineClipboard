@@ -73,7 +73,7 @@ export default function Home() {
 
     return (
 
-      <div className="w-full">
+      <div className="w-full" style={{ transform: 'scale(0.75)', transformOrigin: 'top' }}>
 
                     {/* Sticky Title */}
 
