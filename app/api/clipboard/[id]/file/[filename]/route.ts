@@ -29,7 +29,7 @@ export async function GET(
     const { buffer, mimeType, originalName } = fileData;
 
     // Convert Buffer to Blob for robust response body
-    const blob = new Blob([buffer], { type: mimeType });
+    const blob = new Blob([Uint8Array.from(buffer)], { type: mimeType });
 
     const headers = new Headers();
     headers.set('Content-Type', mimeType);
