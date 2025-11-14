@@ -14,7 +14,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <main className="relative w-full px-4 sm:px-6 lg:px-8 py-8 pt-16 sm:pt-24">
+        {/* Background decorations */}
+        <div className="sticky-note-1 notebook-decoration"></div>
+        <div className="sticky-note-2 notebook-decoration"></div>
+        <div className="sticky-note-3 notebook-decoration"></div>
+        <div className="paper-clip paper-clip-1"></div>
+        <div className="paper-clip paper-clip-2"></div>
+        <div className="star-decoration star-1">⭐</div>
+        <div className="star-decoration star-2">✨</div>
+        <div className="star-decoration star-3">💫</div>
+        
+        <main className="relative w-full px-4 sm:px-6 lg:px-8 py-8 pt-16 sm:pt-24 z-10">
           {children}
         </main>
       </body>

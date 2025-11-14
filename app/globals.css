@@ -22,6 +22,54 @@
     background-position: 0 0, 40px 0;
     font-family: 'Kalam', cursive;
     min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.15;
+    background-image: 
+      /* Doodles and decorations */
+      radial-gradient(circle at 15% 20%, #ffd700 2px, transparent 2px),
+      radial-gradient(circle at 85% 30%, #ff69b4 2px, transparent 2px),
+      radial-gradient(circle at 25% 60%, #87ceeb 2px, transparent 2px),
+      radial-gradient(circle at 75% 70%, #98fb98 2px, transparent 2px),
+      radial-gradient(circle at 10% 80%, #ffb347 2px, transparent 2px),
+      radial-gradient(circle at 90% 15%, #dda0dd 2px, transparent 2px),
+      radial-gradient(circle at 50% 10%, #ff6b6b 1.5px, transparent 1.5px),
+      radial-gradient(circle at 30% 90%, #4ecdc4 2px, transparent 2px),
+      radial-gradient(circle at 70% 50%, #ffe66d 2px, transparent 2px),
+      radial-gradient(circle at 5% 50%, #a8e6cf 2px, transparent 2px);
+    background-size: 
+      100px 100px,
+      120px 120px,
+      80px 80px,
+      150px 150px,
+      90px 90px,
+      110px 110px,
+      70px 70px,
+      130px 130px,
+      100px 100px,
+      95px 95px;
+    background-position:
+      10% 15%,
+      88% 25%,
+      20% 55%,
+      78% 65%,
+      8% 75%,
+      92% 12%,
+      48% 8%,
+      28% 88%,
+      72% 48%,
+      3% 45%;
   }
 }
 
@@ -219,4 +267,107 @@
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }
+}
+
+/* Background decorations - Sticky notes */
+@keyframes gentle-float {
+  0%, 100% { transform: translateY(0px) rotate(-1deg); }
+  50% { transform: translateY(-5px) rotate(1deg); }
+}
+
+.notebook-decoration {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.2;
+}
+
+.sticky-note-1 {
+  top: 10%;
+  right: 5%;
+  width: 80px;
+  height: 80px;
+  background: #ffeb3b;
+  transform: rotate(5deg);
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+  animation: gentle-float 4s ease-in-out infinite;
+}
+
+.sticky-note-2 {
+  top: 60%;
+  left: 3%;
+  width: 70px;
+  height: 70px;
+  background: #ff9800;
+  transform: rotate(-8deg);
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+  animation: gentle-float 5s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+.sticky-note-3 {
+  bottom: 15%;
+  right: 8%;
+  width: 65px;
+  height: 65px;
+  background: #4caf50;
+  transform: rotate(12deg);
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+  animation: gentle-float 6s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+/* Paper clip decoration */
+.paper-clip {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.15;
+  width: 30px;
+  height: 30px;
+  border: 3px solid #666;
+  border-radius: 0 50% 50% 0;
+  transform: rotate(45deg);
+}
+
+.paper-clip-1 {
+  top: 25%;
+  left: 8%;
+  animation: gentle-float 3s ease-in-out infinite;
+}
+
+.paper-clip-2 {
+  bottom: 30%;
+  right: 12%;
+  animation: gentle-float 4s ease-in-out infinite;
+  animation-delay: 1.5s;
+}
+
+/* Hand-drawn star decoration */
+.star-decoration {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.12;
+  font-size: 40px;
+  color: #ffd700;
+  animation: gentle-float 5s ease-in-out infinite;
+}
+
+.star-1 {
+  top: 20%;
+  left: 12%;
+  animation-delay: 0s;
+}
+
+.star-2 {
+  top: 70%;
+  right: 15%;
+  animation-delay: 2s;
+}
+
+.star-3 {
+  bottom: 20%;
+  left: 6%;
+  animation-delay: 1s;
 }
