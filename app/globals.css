@@ -289,8 +289,22 @@
   height: 80px;
   background: #ffeb3b;
   transform: rotate(5deg);
-  box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+  box-shadow: 
+    2px 2px 4px rgba(0,0,0,0.2),
+    inset 0 -2px 0 rgba(0,0,0,0.1);
+  border-radius: 2px;
   animation: gentle-float 4s ease-in-out infinite;
+}
+
+.sticky-note-1::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px dashed rgba(0,0,0,0.1);
+  border-radius: 1px;
 }
 
 .sticky-note-2 {
@@ -300,9 +314,23 @@
   height: 70px;
   background: #ff9800;
   transform: rotate(-8deg);
-  box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+  box-shadow: 
+    2px 2px 4px rgba(0,0,0,0.2),
+    inset 0 -2px 0 rgba(0,0,0,0.1);
+  border-radius: 2px;
   animation: gentle-float 5s ease-in-out infinite;
   animation-delay: 1s;
+}
+
+.sticky-note-2::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px dashed rgba(0,0,0,0.1);
+  border-radius: 1px;
 }
 
 .sticky-note-3 {
@@ -312,9 +340,23 @@
   height: 65px;
   background: #4caf50;
   transform: rotate(12deg);
-  box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+  box-shadow: 
+    2px 2px 4px rgba(0,0,0,0.2),
+    inset 0 -2px 0 rgba(0,0,0,0.1);
+  border-radius: 2px;
   animation: gentle-float 6s ease-in-out infinite;
   animation-delay: 2s;
+}
+
+.sticky-note-3::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 1px dashed rgba(0,0,0,0.1);
+  border-radius: 1px;
 }
 
 /* Paper clip decoration */
