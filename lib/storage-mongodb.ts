@@ -1,5 +1,6 @@
 import connectDB from './mongodb';
 import Clipboard, { IClipboard, IClipboardFile } from '@/models/Clipboard';
+import { uploadFileToGridFS, downloadFileFromGridFS, deleteClipboardFilesFromGridFS } from './gridfs';
 
 export interface ClipboardData {
   id: string;
@@ -11,6 +12,7 @@ export interface ClipboardData {
     uploadTime: string;
     mimeType: string;
   }>;
+  isPublic: boolean;
   createdAt: string;
   lastAccessed: string;
   expiresAt: string;
@@ -72,6 +74,7 @@ export async function getClipboard(id: string): Promise<ClipboardData | null> {
         uploadTime: file.uploadTime.toISOString(),
         mimeType: file.mimeType
       })),
+      isPublic: clipboard.isPublic,
       createdAt: clipboard.createdAt.toISOString(),
       lastAccessed: clipboard.lastAccessed.toISOString(),
       expiresAt: clipboard.expiresAt.toISOString()
@@ -83,28 +86,41 @@ export async function getClipboard(id: string): Promise<ClipboardData | null> {
 }
 
 // Create new clipboard
-export async function createClipboard(content: string = ''): Promise<ClipboardData> {
+export async function createClipboard(content: string = '', isPublic: boolean = false): Promise<ClipboardData> {
   const id = await generateId();
   const now = new Date();
   const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
   
   await connectDB();
   
+  console.log(`Creating clipboard with isPublic: ${isPublic}, type: ${typeof isPublic}`);
+  
   const clipboard = new Clipboard({
     id,
     content,
     files: [],
+    isPublic: Boolean(isPublic), // Explicitly convert to boolean
     createdAt: now,
     lastAccessed: now,
     expiresAt
   });
   
-  await clipboard.save();
+  console.log(`Clipboard object before save - isPublic: ${clipboard.isPublic}, type: ${typeof clipboard.isPublic}`);
+  
+  // Explicitly mark the field as modified to ensure it's saved
+  clipboard.markModified('isPublic');
+  await clipboard.save({ validateBeforeSave: true });
+  
+  // Verify it was saved correctly by fetching it back
+  const saved = await Clipboard.findOne({ id }).lean();
+  console.log(`Created clipboard ${id} - before save: ${clipboard.isPublic}, after save (from object): ${clipboard.isPublic}, from DB query: ${saved?.isPublic}, type: ${typeof saved?.isPublic}`);
+  console.log(`Full saved document:`, JSON.stringify(saved, null, 2));
   
   return {
     id: clipboard.id,
     content: clipboard.content,
     files: [],
+    isPublic: clipboard.isPublic,
     createdAt: clipboard.createdAt.toISOString(),
     lastAccessed: clipboard.lastAccessed.toISOString(),
     expiresAt: clipboard.expiresAt.toISOString()
@@ -136,13 +152,21 @@ export async function addFileToClipboard(id: string, file: UploadedFile, buffer:
   try {
     await connectDB();
     
+    // Upload file to GridFS
+    const gridfsId = await uploadFileToGridFS(buffer, file.filename, {
+      clipboardId: id,
+      originalName: file.originalName,
+      mimeType: file.mimeType
+    });
+    
+    // Store file metadata in clipboard document
     const fileData: IClipboardFile = {
       filename: file.filename,
       originalName: file.originalName,
       size: file.size,
       uploadTime: new Date(file.uploadTime),
       mimeType: file.mimeType,
-      buffer: buffer
+      gridfsId: gridfsId
     };
     
     const result = await Clipboard.findOneAndUpdate(
@@ -165,6 +189,7 @@ export async function getFileBuffer(id: string, filename: string): Promise<{ buf
   try {
     await connectDB();
     
+    // Get file metadata from clipboard document
     const clipboard = await Clipboard.findOne(
       { id, 'files.filename': filename },
       { 'files.$': 1 }
@@ -175,10 +200,19 @@ export async function getFileBuffer(id: string, filename: string): Promise<{ buf
     }
     
     const file = clipboard.files[0];
+    
+    // Download file from GridFS using the stored GridFS ID
+    const fileData = await downloadFileFromGridFS(file.gridfsId);
+    
+    if (!fileData) {
+      return null;
+    }
+    
+    // Return file data with metadata from clipboard (in case GridFS metadata is missing)
     return {
-      buffer: file.buffer,
-      mimeType: file.mimeType,
-      originalName: file.originalName
+      buffer: fileData.buffer,
+      mimeType: file.mimeType || fileData.mimeType,
+      originalName: file.originalName || fileData.originalName
     };
   } catch (error) {
     console.error('Error getting file buffer:', error);
@@ -191,6 +225,10 @@ export async function deleteClipboard(id: string): Promise<boolean> {
   try {
     await connectDB();
     
+    // Delete all GridFS files associated with this clipboard
+    await deleteClipboardFilesFromGridFS(id);
+    
+    // Delete the clipboard document
     const result = await Clipboard.findOneAndDelete({ id });
     return !!result;
   } catch (error) {
@@ -213,14 +251,29 @@ export async function getAllClipboardIds(): Promise<string[]> {
 }
 
 // Get all clipboards (sorted by most recent)
-export async function getAllClipboards(limit: number = 50): Promise<ClipboardData[]> {
+export async function getAllClipboards(limit: number = 50, publicOnly: boolean = false): Promise<ClipboardData[]> {
   try {
     await connectDB();
     
-    const clipboards = await Clipboard.find({})
+    // Use simpler query - MongoDB handles boolean true directly
+    const query = publicOnly ? { isPublic: true } : {};
+    console.log('Query for clipboards:', JSON.stringify(query), 'publicOnly:', publicOnly);
+    
+    // Also check all clipboards to see what's in the database
+    const allClipboards = await Clipboard.find({}).select('id isPublic createdAt').limit(10).sort({ createdAt: -1 });
+    console.log('Sample of all clipboards in DB (most recent 10):', allClipboards.map(c => ({ 
+      id: c.id, 
+      isPublic: c.isPublic, 
+      isPublicType: typeof c.isPublic,
+      createdAt: c.createdAt 
+    })));
+    
+    const clipboards = await Clipboard.find(query)
       .sort({ createdAt: -1 }) // Most recent first
       .limit(limit)
-      .select('id content files createdAt lastAccessed expiresAt');
+      .select('id content files isPublic createdAt lastAccessed expiresAt');
+    
+    console.log(`Found ${clipboards.length} clipboards with query { isPublic: true }. Sample:`, clipboards.slice(0, 3).map(c => ({ id: c.id, isPublic: c.isPublic, isPublicType: typeof c.isPublic })));
     
     return clipboards.map(clipboard => ({
       id: clipboard.id,
@@ -232,6 +285,7 @@ export async function getAllClipboards(limit: number = 50): Promise<ClipboardDat
         uploadTime: file.uploadTime.toISOString(),
         mimeType: file.mimeType
       })),
+      isPublic: clipboard.isPublic,
       createdAt: clipboard.createdAt.toISOString(),
       lastAccessed: clipboard.lastAccessed.toISOString(),
       expiresAt: clipboard.expiresAt.toISOString()
@@ -247,6 +301,17 @@ export async function cleanupExpiredClipboards(): Promise<number> {
   try {
     await connectDB();
     
+    // Find expired clipboards
+    const expiredClipboards = await Clipboard.find({
+      expiresAt: { $lt: new Date() }
+    });
+    
+    // Delete GridFS files for each expired clipboard
+    for (const clipboard of expiredClipboards) {
+      await deleteClipboardFilesFromGridFS(clipboard.id);
+    }
+    
+    // Delete the clipboard documents
     const result = await Clipboard.deleteMany({
       expiresAt: { $lt: new Date() }
     });

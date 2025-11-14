@@ -15,6 +15,7 @@ interface ClipboardListItem {
     uploadTime: string;
     mimeType: string;
   }>;
+  isPublic?: boolean;
   createdAt: string;
   lastAccessed: string;
   expiresAt: string;
@@ -26,18 +27,26 @@ export default function Home() {
   const [files, setFiles] = useState<File[]>([]);
   const [clipboards, setClipboards] = useState<ClipboardListItem[]>([]);
   const [loadingClipboards, setLoadingClipboards] = useState(true);
+  const [isPublic, setIsPublic] = useState(false);
   const router = useRouter();
 
   const handleCreateClipboard = async (content: string) => {
+    // Validation: must have either text or files
+    if (!content.trim() && files.length === 0) {
+      alert('Please add text content or upload at least one file to create a clipboard.');
+      return;
+    }
+
+    console.log('Creating clipboard with isPublic:', isPublic);
     setLoading(true);
     try {
-      // Create clipboard with content
+      // Create clipboard with content and public setting
       const response = await fetch('/api/clipboard', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ content, isPublic }),
       });
 
       const data = await response.json();
@@ -62,9 +71,18 @@ export default function Home() {
           }
         }
         
-        // Refresh the clipboard list
+        // Reset form
+        setFiles([]);
+        setIsPublic(false);
+        
+        // Wait a bit for the database to be updated, then refresh
+        await new Promise(resolve => setTimeout(resolve, 500));
         await fetchClipboards();
-        router.push(`/clipboard/${clipboardId}`);
+        
+        // Small delay to ensure state updates
+        setTimeout(() => {
+          router.push(`/clipboard/${clipboardId}`);
+        }, 100);
       } else {
         alert('Failed to create clipboard: ' + data.error);
       }
@@ -93,10 +111,13 @@ export default function Home() {
   const fetchClipboards = async () => {
     try {
       setLoadingClipboards(true);
-      const response = await fetch('/api/clipboard?all=true');
+      // Only fetch public clipboards for the "Recent Clipboards" section
+      const response = await fetch('/api/clipboard?all=true&public=true');
       const data = await response.json();
       
+      console.log('Fetched clipboards:', data.clipboards?.length || 0, 'clipboards');
       if (data.success && data.clipboards) {
+        console.log('Setting clipboards:', data.clipboards.map((c: ClipboardListItem) => ({ id: c.id, isPublic: (c as any).isPublic })));
         setClipboards(data.clipboards);
       }
     } catch (error) {
@@ -200,8 +221,37 @@ export default function Home() {
               buttonText="Create Clipboard"
 
             />
-
             
+            {/* Public Toggle */}
+            <div className="mt-6 flex items-center justify-between bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+              <div className="flex items-center space-x-3">
+                <span className="text-2xl">🌐</span>
+                <div>
+                  <label htmlFor="publicToggle" className="text-lg handwriting-bold text-blue-900 cursor-pointer">
+                    Make Public (Show in Recent Clipboards)
+                  </label>
+                  <p className="text-sm text-blue-700 handwriting">
+                    Allow this clipboard to appear in the Recent Clipboards list
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsPublic(!isPublic)}
+                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 ${
+                  isPublic ? 'bg-blue-600' : 'bg-gray-300'
+                }`}
+                role="switch"
+                aria-checked={isPublic}
+                aria-label="Toggle public visibility"
+              >
+                <span
+                  className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                    isPublic ? 'translate-x-7' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
 
             {/* File Upload Section */}
 

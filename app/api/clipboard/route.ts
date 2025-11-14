@@ -6,12 +6,20 @@ export const runtime = 'nodejs';
 export async function POST(request: NextRequest) {
   try {
     // Run cleanup on each request
-    cleanupExpiredClipboards();
+    await cleanupExpiredClipboards();
     
     const body = await request.json();
     const content = body.content || '';
+    const isPublic = body.isPublic === true; // Default to false
     
-    const clipboard = await createClipboard(content);
+    console.log('API: Creating clipboard - isPublic from body:', body.isPublic, 'parsed as:', isPublic);
+    
+    // Note: Files are uploaded after clipboard creation
+    // Frontend should validate that either text or files are present before creating
+    // Backend allows empty content to support file-only clipboards
+    
+    const clipboard = await createClipboard(content, isPublic);
+    console.log('API: Created clipboard - returned isPublic:', clipboard.isPublic);
     
     return NextResponse.json({
       success: true,
@@ -33,11 +41,13 @@ export async function GET(request: NextRequest) {
     const all = searchParams.get('all');
     
     // Run cleanup on each request
-    cleanupExpiredClipboards();
+    await cleanupExpiredClipboards();
     
     // If 'all' parameter is present, return all clipboards
     if (all === 'true') {
-      const clipboards = await getAllClipboards();
+      const publicOnly = searchParams.get('public') === 'true';
+      const clipboards = await getAllClipboards(50, publicOnly);
+      console.log(`Fetching clipboards - publicOnly: ${publicOnly}, found: ${clipboards.length}`);
       return NextResponse.json({
         success: true,
         clipboards,

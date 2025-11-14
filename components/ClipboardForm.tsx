@@ -46,7 +46,7 @@ export default function ClipboardForm({
           onChange={(e) => setContent(e.target.value)}
           placeholder={placeholder}
           rows={8}
-          className="w-full px-4 py-4 bg-white border-2 border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-500 resize-none text-lg transition-all duration-200 hover:border-blue-400 handwriting shadow-sm"
+          className="w-full px-4 py-4 bg-white border-2 border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-500 resize-none text-lg transition-all duration-200 hover:border-blue-400 shadow-sm"
         />
       </div>
       

@@ -83,7 +83,7 @@ export default function ClipboardViewer({ clipboard }: ClipboardViewerProps) {
         
         {clipboard.content ? (
           <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 shadow-inner">
-            <pre className="whitespace-pre-wrap text-blue-900 handwriting text-base leading-relaxed">
+            <pre className="whitespace-pre-wrap text-blue-900 text-base leading-relaxed font-sans">
               {clipboard.content}
             </pre>
           </div>

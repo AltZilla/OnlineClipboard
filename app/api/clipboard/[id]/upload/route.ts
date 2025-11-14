@@ -19,10 +19,10 @@ export async function POST(
     }
     
     // Run cleanup on each request
-    cleanupExpiredClipboards();
+    await cleanupExpiredClipboards();
     
     // Check if clipboard exists
-    const clipboard = getClipboard(id);
+    const clipboard = await getClipboard(id);
     if (!clipboard) {
       return NextResponse.json(
         { success: false, error: 'Clipboard not found' },

@@ -6,13 +6,14 @@ export interface IClipboardFile {
   size: number;
   uploadTime: Date;
   mimeType: string;
-  buffer: Buffer;
+  gridfsId: string; // GridFS file ID instead of buffer
 }
 
 export interface IClipboard extends Document {
   id: string;
   content: string;
   files: IClipboardFile[];
+  isPublic: boolean;
   createdAt: Date;
   lastAccessed: Date;
   expiresAt: Date;
@@ -24,7 +25,7 @@ const ClipboardFileSchema = new Schema<IClipboardFile>({
   size: { type: Number, required: true },
   uploadTime: { type: Date, default: Date.now },
   mimeType: { type: String, required: true },
-  buffer: { type: Buffer, required: true }
+  gridfsId: { type: String, required: true } // GridFS file ID
 }, { _id: false });
 
 const ClipboardSchema = new Schema<IClipboard>({
@@ -39,6 +40,10 @@ const ClipboardSchema = new Schema<IClipboard>({
     default: '' 
   },
   files: [ClipboardFileSchema],
+  isPublic: {
+    type: Boolean,
+    default: false
+  },
   createdAt: { 
     type: Date, 
     default: Date.now 
@@ -63,4 +68,9 @@ ClipboardSchema.pre('findOneAndUpdate', function() {
   this.set({ lastAccessed: new Date() });
 });
 
-export default mongoose.models.Clipboard || mongoose.model<IClipboard>('Clipboard', ClipboardSchema);
+// Clear the model cache to ensure schema updates are applied
+if (mongoose.models.Clipboard) {
+  delete mongoose.models.Clipboard;
+}
+
+export default mongoose.model<IClipboard>('Clipboard', ClipboardSchema);
