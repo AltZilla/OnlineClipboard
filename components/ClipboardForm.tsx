@@ -37,7 +37,7 @@ export default function ClipboardForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <label htmlFor="content" className="block text-lg font-semibold text-gray-700 mb-4">
+        <label htmlFor="content" className="block text-lg handwriting-bold text-blue-900 mb-4">
           Text Content
         </label>
         <textarea
@@ -46,7 +46,7 @@ export default function ClipboardForm({
           onChange={(e) => setContent(e.target.value)}
           placeholder={placeholder}
           rows={8}
-          className="w-full px-4 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-lg transition-all duration-200 hover:border-gray-400"
+          className="w-full px-4 py-4 bg-white border-2 border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-500 resize-none text-lg transition-all duration-200 hover:border-blue-400 handwriting shadow-sm"
         />
       </div>
       
@@ -54,11 +54,11 @@ export default function ClipboardForm({
         <button
           type="submit"
           disabled={loading}
-          className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-6 rounded-xl hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed text-lg font-semibold transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100"
+          className="flex-1 notebook-button text-blue-900 py-4 px-6 disabled:opacity-50 disabled:cursor-not-allowed text-lg handwriting-bold disabled:hover:transform-none"
         >
           {loading ? (
             <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-900 mr-2"></div>
               Processing...
             </div>
           ) : (
@@ -70,7 +70,7 @@ export default function ClipboardForm({
           <button
             type="button"
             onClick={handleCopyToClipboard}
-            className="bg-gradient-to-r from-gray-600 to-gray-700 text-white py-4 px-6 rounded-xl hover:from-gray-700 hover:to-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 text-lg font-semibold transition-all duration-200 transform hover:scale-105"
+            className="notebook-button text-blue-900 py-4 px-6 text-lg handwriting-bold"
           >
             📋 Copy
           </button>

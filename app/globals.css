@@ -2,28 +2,103 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Indie+Flower&display=swap');
+
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-800;
+    @apply text-blue-900;
+    background: #fefefe;
+    background-image: 
+      /* Red margin line */
+      linear-gradient(to right, #ff6b6b 0px, #ff6b6b 3px, transparent 3px),
+      /* Horizontal lines */
+      repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 29px,
+        #e0e0e0 29px,
+        #e0e0e0 30px
+      );
+    background-position: 0 0, 40px 0;
+    font-family: 'Kalam', cursive;
+    min-height: 100vh;
   }
 }
 
-.animated-gradient {
-  background: linear-gradient(45deg, #a855f7, #6366f1, #ec4899, #f97316);
-  background-size: 400% 400%;
-  animation: gradient 15s ease infinite;
+/* Notebook paper container */
+.notebook-paper {
+  background: #fefefe;
+  background-image: 
+    /* Red margin line */
+    linear-gradient(to right, #ff6b6b 0px, #ff6b6b 3px, transparent 3px),
+    /* Horizontal lines */
+    repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 29px,
+      #e0e0e0 29px,
+      #e0e0e0 30px
+    );
+  background-position: 0 0, 40px 0;
+  position: relative;
+  box-shadow: 
+    0 0 0 1px rgba(0,0,0,0.1),
+    0 2px 4px rgba(0,0,0,0.1),
+    0 8px 16px rgba(0,0,0,0.1);
 }
 
-@keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+/* Hand-drawn style borders */
+.hand-drawn {
+  border: 3px solid #333;
+  border-radius: 8px;
+  box-shadow: 
+    0 2px 4px rgba(0,0,0,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.3);
+  position: relative;
+}
+
+.hand-drawn::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 2px solid #666;
+  border-radius: 8px;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* Paper card style */
+.paper-card {
+  background: #fffef7;
+  border: 2px solid #333;
+  border-radius: 4px;
+  box-shadow: 
+    0 2px 8px rgba(0,0,0,0.15),
+    0 4px 16px rgba(0,0,0,0.1),
+    inset 0 1px 0 rgba(255,255,255,0.5);
+  position: relative;
+}
+
+.paper-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+  pointer-events: none;
+  border-radius: 4px;
 }
 
 /* Animations */
@@ -77,30 +152,63 @@
 
 /* Custom styles for drag and drop */
 .drag-over {
-  @apply border-blue-500 bg-blue-50 transform scale-105;
+  @apply border-blue-600 bg-blue-100 transform scale-105;
+  border-style: dashed !important;
 }
 
 .file-drop-zone {
-  @apply border-2 border-dashed border-gray-300 rounded-lg p-8 text-center transition-all duration-300 hover:border-gray-400 hover:shadow-lg;
+  @apply border-2 border-dashed border-blue-600 rounded-lg p-8 text-center transition-all duration-300;
+  background: #fffef7;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.file-drop-zone:hover {
+  @apply border-blue-700;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .file-drop-zone.drag-over {
-  @apply border-blue-500 bg-blue-50 transform scale-105 shadow-xl;
+  @apply border-blue-600 bg-blue-100 transform scale-105;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
 }
 
-/* Glass morphism effect */
-.glass {
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+/* Notebook button style */
+.notebook-button {
+  background: #fffef7;
+  border: 2px solid #333;
+  border-radius: 4px;
+  box-shadow: 
+    0 2px 4px rgba(0,0,0,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.5);
+  position: relative;
+  font-family: 'Kalam', cursive;
+  font-weight: 700;
+  transition: all 0.2s ease;
 }
 
-/* Gradient text */
-.gradient-text {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.notebook-button:hover {
+  box-shadow: 
+    0 3px 6px rgba(0,0,0,0.25),
+    inset 0 1px 0 rgba(255,255,255,0.5);
+  transform: translateY(-1px);
+}
+
+.notebook-button:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 1px 2px rgba(0,0,0,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.5);
+}
+
+/* Handwriting text style */
+.handwriting {
+  font-family: 'Kalam', cursive;
+  font-weight: 400;
+}
+
+.handwriting-bold {
+  font-family: 'Kalam', cursive;
+  font-weight: 700;
 }
 
 /* Floating animation */

@@ -63,18 +63,18 @@ export default function ClipboardViewer({ clipboard }: ClipboardViewerProps) {
   return (
     <div className="space-y-8">
       {/* Text Content */}
-      <div className="bg-white/20 backdrop-blur-lg rounded-2xl shadow-lg border border-white/30 p-8 animate-fadeIn">
+      <div className="paper-card p-8 animate-fadeIn">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-2xl font-bold text-white flex items-center">
-            <span className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mr-3">
-              <span className="text-white text-sm">📝</span>
+          <h3 className="text-2xl handwriting-bold text-blue-900 flex items-center">
+            <span className="w-8 h-8 bg-blue-100 border-2 border-blue-300 rounded-lg flex items-center justify-center mr-3 shadow-sm">
+              <span className="text-blue-900 text-sm">📝</span>
             </span>
             Text Content
           </h3>
           {clipboard.content && (
             <button
               onClick={handleCopyText}
-              className="bg-white/20 backdrop-blur-lg border border-white/30 text-white py-2 px-4 rounded-lg hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white/50 text-sm font-semibold transition-all duration-200 transform hover:scale-105"
+              className="notebook-button text-blue-900 py-2 px-4 text-sm handwriting-bold"
             >
               📋 Copy Text
             </button>
@@ -82,24 +82,24 @@ export default function ClipboardViewer({ clipboard }: ClipboardViewerProps) {
         </div>
         
         {clipboard.content ? (
-          <div className="bg-black/10 rounded-xl p-6 shadow-inner">
-            <pre className="whitespace-pre-wrap text-white font-mono text-base leading-relaxed">
+          <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 shadow-inner">
+            <pre className="whitespace-pre-wrap text-blue-900 handwriting text-base leading-relaxed">
               {clipboard.content}
             </pre>
           </div>
         ) : (
-          <div className="bg-black/10 rounded-xl p-12 text-center">
-            <div className="text-white/50 text-4xl mb-4 floating">📝</div>
-            <p className="text-white/70 text-lg">No text content</p>
+          <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-12 text-center">
+            <div className="text-blue-400 text-4xl mb-4 floating">📝</div>
+            <p className="text-blue-700 text-lg handwriting">No text content</p>
           </div>
         )}
       </div>
 
       {/* Files */}
-      <div className="bg-white/20 backdrop-blur-lg rounded-2xl shadow-lg border border-white/30 p-8 animate-fadeIn" style={{animationDelay: '0.2s'}}>
-        <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
-          <span className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mr-3">
-            <span className="text-white text-sm">📁</span>
+      <div className="paper-card p-8 animate-fadeIn" style={{animationDelay: '0.2s'}}>
+        <h3 className="text-2xl handwriting-bold text-blue-900 mb-6 flex items-center">
+          <span className="w-8 h-8 bg-blue-100 border-2 border-blue-300 rounded-lg flex items-center justify-center mr-3 shadow-sm">
+            <span className="text-blue-900 text-sm">📁</span>
           </span>
           Files ({clipboard.files?.length || 0})
         </h3>
@@ -109,7 +109,7 @@ export default function ClipboardViewer({ clipboard }: ClipboardViewerProps) {
             {clipboard.files.map((file, index) => (
               <div
                 key={index}
-                className="bg-black/10 backdrop-blur-lg border border-white/20 rounded-2xl p-4 flex items-center justify-between shadow-lg hover:bg-black/20 transition-all duration-300 transform hover:-translate-y-1 animate-slideIn"
+                className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 flex items-center justify-between shadow-sm hover:bg-blue-100 transition-all duration-300 transform hover:-translate-y-1 animate-slideIn"
                 style={{animationDelay: `${index * 0.1}s`}}
               >
                 <div className="flex items-center space-x-4 truncate">
@@ -117,8 +117,8 @@ export default function ClipboardViewer({ clipboard }: ClipboardViewerProps) {
                     {getFileIcon(file.originalName)}
                   </div>
                   <div className="truncate">
-                    <p className="font-semibold text-white text-lg truncate">{file.originalName}</p>
-                    <p className="text-sm text-white/70">
+                    <p className="handwriting-bold text-blue-900 text-lg truncate">{file.originalName}</p>
+                    <p className="text-sm text-blue-700 handwriting">
                       {formatFileSize(file.size)} • Uploaded {formatDate(file.uploadTime)}
                     </p>
                   </div>
@@ -126,7 +126,7 @@ export default function ClipboardViewer({ clipboard }: ClipboardViewerProps) {
                 
                 <button
                   onClick={() => handleDownloadFile(file.filename, file.originalName)}
-                  className="bg-white/20 backdrop-blur-lg border border-white/30 text-white py-2 px-5 rounded-xl hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-200 transform hover:scale-105 font-semibold ml-4"
+                  className="notebook-button text-blue-900 py-2 px-5 text-lg handwriting-bold ml-4"
                 >
                   📥
                 </button>
@@ -134,9 +134,9 @@ export default function ClipboardViewer({ clipboard }: ClipboardViewerProps) {
             ))}
           </div>
         ) : (
-          <div className="bg-black/10 rounded-xl p-12 text-center">
-            <div className="text-white/50 text-4xl mb-4 floating">📁</div>
-            <p className="text-white/70 text-lg">No files uploaded</p>
+          <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-12 text-center">
+            <div className="text-blue-400 text-4xl mb-4 floating">📁</div>
+            <p className="text-blue-700 text-lg handwriting">No files uploaded</p>
           </div>
         )}
       </div>
