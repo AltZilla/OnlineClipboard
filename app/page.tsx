@@ -1,14 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ClipboardForm from '@/components/ClipboardForm';
 import FileUpload from '@/components/FileUpload';
+
+interface ClipboardListItem {
+  id: string;
+  content: string;
+  files: Array<{
+    filename: string;
+    originalName: string;
+    size: number;
+    uploadTime: string;
+    mimeType: string;
+  }>;
+  createdAt: string;
+  lastAccessed: string;
+  expiresAt: string;
+}
 
 export default function Home() {
   const [clipboardId, setClipboardId] = useState('');
   const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
+  const [clipboards, setClipboards] = useState<ClipboardListItem[]>([]);
+  const [loadingClipboards, setLoadingClipboards] = useState(true);
   const router = useRouter();
 
   const handleCreateClipboard = async (content: string) => {
@@ -45,6 +62,8 @@ export default function Home() {
           }
         }
         
+        // Refresh the clipboard list
+        await fetchClipboards();
         router.push(`/clipboard/${clipboardId}`);
       } else {
         alert('Failed to create clipboard: ' + data.error);
@@ -71,19 +90,64 @@ export default function Home() {
     }
   };
 
+  const fetchClipboards = async () => {
+    try {
+      setLoadingClipboards(true);
+      const response = await fetch('/api/clipboard?all=true');
+      const data = await response.json();
+      
+      if (data.success && data.clipboards) {
+        setClipboards(data.clipboards);
+      }
+    } catch (error) {
+      console.error('Error fetching clipboards:', error);
+    } finally {
+      setLoadingClipboards(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchClipboards();
+  }, []);
+
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return 'Invalid Date';
+      }
+      return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return 'Invalid Date';
+    }
+  };
+
+  const getPreviewText = (content: string, maxLength: number = 50) => {
+    if (!content) return 'No content';
+    return content.length > maxLength 
+      ? content.substring(0, maxLength) + '...' 
+      : content;
+  };
+
     return (
 
-      <div className="w-full" style={{ transform: 'scale(0.75)', transformOrigin: 'top' }}>
+      <div className="w-full">
 
-                    {/* Sticky Title */}
+                    {/* Title */}
 
-                    <div className="text-center mb-12 animate-fadeIn sticky top-3 z-10 py-4">
+                    <div className="text-center mb-12 animate-fadeIn py-4">
 
-                      <div className="inline-block bg-white/10 backdrop-blur-lg rounded-full shadow-lg border border-white/20 px-8 py-4">
+                      <div className="inline-block paper-card px-8 py-4">
 
-                          <h1 className="text-5xl font-bold text-white">
+                          <h1 className="text-5xl handwriting-bold text-blue-900">
 
-                            Online Clipboard
+                            📓 Online Clipboard
 
                           </h1>
 
@@ -95,7 +159,7 @@ export default function Home() {
 
                     {/* Subtitle */}
 
-                    <p className="text-2xl text-white/80 max-w-3xl mx-auto leading-relaxed text-center -mt-12 mb-12">
+                    <p className="text-2xl text-blue-800 max-w-3xl mx-auto leading-relaxed text-center -mt-12 mb-12 handwriting">
 
                       Share text and files between devices with a unique ID
 
@@ -107,17 +171,17 @@ export default function Home() {
 
           {/* Create New Clipboard */}
 
-          <div className="bg-white/20 backdrop-blur-lg rounded-2xl shadow-lg border border-white/30 p-8 animate-slideIn">
+          <div className="paper-card p-8 animate-slideIn">
 
             <div className="flex items-center mb-6">
 
-              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4">
+              <div className="w-12 h-12 bg-yellow-100 border-2 border-yellow-300 rounded-lg flex items-center justify-center mr-4 shadow-md">
 
                 <span className="text-2xl">✨</span>
 
               </div>
 
-              <h2 className="text-3xl font-bold text-white">
+              <h2 className="text-3xl handwriting-bold text-blue-900">
 
                 Create New Clipboard
 
@@ -143,9 +207,9 @@ export default function Home() {
 
             <div className="mt-8">
 
-              <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
+              <h3 className="text-xl handwriting-bold text-blue-900 mb-4 flex items-center">
 
-                <span className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mr-3">
+                <span className="w-8 h-8 bg-blue-100 border-2 border-blue-300 rounded-lg flex items-center justify-center mr-3 shadow-sm">
 
                   📁
 
@@ -165,7 +229,7 @@ export default function Home() {
 
                 <div className="mt-6 animate-fadeIn">
 
-                  <h4 className="text-lg font-medium text-white/90 mb-4">
+                  <h4 className="text-lg handwriting-bold text-blue-900 mb-4">
 
                     Selected Files ({files.length}):
 
@@ -175,7 +239,7 @@ export default function Home() {
 
                     {files.map((file, index) => (
 
-                      <div key={index} className="flex items-center justify-between bg-black/10 backdrop-blur-lg border border-white/20 p-3 rounded-xl hover:bg-black/20 transition-all duration-200">
+                      <div key={index} className="flex items-center justify-between bg-blue-50 border-2 border-blue-200 p-3 rounded-lg hover:bg-blue-100 transition-all duration-200 shadow-sm">
 
                         <div className="flex items-center space-x-3 truncate">
 
@@ -183,9 +247,9 @@ export default function Home() {
 
                           <div className="truncate">
 
-                            <span className="text-sm font-medium text-white truncate">{file.name}</span>
+                            <span className="text-sm handwriting-bold text-blue-900 truncate">{file.name}</span>
 
-                            <span className="text-xs text-white/70 block">
+                            <span className="text-xs text-blue-700 block">
 
                               {(file.size / 1024 / 1024).toFixed(2)} MB
 
@@ -199,7 +263,7 @@ export default function Home() {
 
                           onClick={() => removeFile(index)}
 
-                          className="text-red-400 hover:text-red-500 text-lg hover:scale-110 transition-transform duration-200"
+                          className="text-red-600 hover:text-red-700 text-lg hover:scale-110 transition-transform duration-200 handwriting-bold"
 
                         >
 
@@ -225,17 +289,17 @@ export default function Home() {
 
           {/* Access Existing Clipboard */}
 
-          <div className="bg-white/20 backdrop-blur-lg rounded-2xl shadow-lg border border-white/30 p-8 animate-fadeIn" style={{animationDelay: '0.2s'}}>
+          <div className="paper-card p-8 animate-fadeIn" style={{animationDelay: '0.2s'}}>
 
             <div className="flex items-center mb-6">
 
-              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4">
+              <div className="w-12 h-12 bg-green-100 border-2 border-green-300 rounded-lg flex items-center justify-center mr-4 shadow-md">
 
                 <span className="text-2xl">🔍</span>
 
               </div>
 
-              <h2 className="text-3xl font-bold text-white">
+              <h2 className="text-3xl handwriting-bold text-blue-900">
 
                 Access Existing Clipboard
 
@@ -247,7 +311,7 @@ export default function Home() {
 
               <div>
 
-                <label htmlFor="clipboardId" className="block text-lg font-semibold text-white mb-3">
+                <label htmlFor="clipboardId" className="block text-lg handwriting-bold text-blue-900 mb-3">
 
                   Clipboard ID
 
@@ -261,13 +325,18 @@ export default function Home() {
 
                   value={clipboardId}
 
-                  onChange={(e) => setClipboardId(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, ''); // Only allow digits
+                    setClipboardId(value);
+                  }}
 
-                  placeholder="Enter 8-character ID"
+                  placeholder="Enter 4-digit ID"
 
-                  className="w-full px-4 py-3 bg-white/10 border-2 border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent text-lg transition-all duration-200"
+                  className="w-full px-4 py-3 bg-white border-2 border-blue-300 rounded-lg text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-500 text-lg transition-all duration-200 handwriting shadow-sm"
 
-                  maxLength={8}
+                  maxLength={4}
+                  pattern="[0-9]{4}"
+                  inputMode="numeric"
 
                 />
 
@@ -279,13 +348,75 @@ export default function Home() {
 
                 disabled={!clipboardId.trim()}
 
-                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 px-6 rounded-xl hover:from-purple-600 hover:to-pink-600 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:from-gray-500 disabled:to-gray-600 disabled:cursor-not-allowed text-lg font-semibold transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100"
+                className="w-full notebook-button text-blue-900 py-4 px-6 disabled:opacity-50 disabled:cursor-not-allowed text-lg handwriting-bold disabled:hover:transform-none"
 
               >
 
                 Access Clipboard
 
               </button>
+
+              {/* Recent Clipboards List */}
+              <div className="mt-8">
+                <h3 className="text-xl handwriting-bold text-blue-900 mb-4 flex items-center">
+                  <span className="w-8 h-8 bg-green-100 border-2 border-green-300 rounded-lg flex items-center justify-center mr-3 shadow-sm">
+                    📋
+                  </span>
+                  Recent Clipboards
+                </h3>
+
+                {loadingClipboards ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                    <p className="text-blue-700 handwriting text-sm">Loading...</p>
+                  </div>
+                ) : clipboards.length > 0 ? (
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {clipboards.map((clipboard) => (
+                      <div
+                        key={clipboard.id}
+                        onClick={() => router.push(`/clipboard/${clipboard.id}`)}
+                        className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 hover:bg-blue-100 transition-all duration-200 shadow-sm cursor-pointer group"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <code className="font-mono bg-blue-100 text-blue-900 px-2 py-1 rounded border border-blue-300 text-sm handwriting-bold">
+                                {clipboard.id}
+                              </code>
+                              {clipboard.files && clipboard.files.length > 0 && (
+                                <span className="text-blue-700 text-sm handwriting">
+                                  📁 {clipboard.files.length} file{clipboard.files.length > 1 ? 's' : ''}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-blue-800 handwriting mb-2 line-clamp-2">
+                              {getPreviewText(clipboard.content)}
+                            </p>
+                            <p className="text-xs text-blue-600 handwriting">
+                              Created: {formatDate(clipboard.createdAt)}
+                            </p>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/clipboard/${clipboard.id}`);
+                            }}
+                            className="ml-3 notebook-button text-blue-900 py-2 px-4 text-sm handwriting-bold opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            Open →
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-8 text-center">
+                    <div className="text-blue-400 text-3xl mb-3">📋</div>
+                    <p className="text-blue-700 handwriting">No clipboards yet. Create one to get started!</p>
+                  </div>
+                )}
+              </div>
 
             </div>
 

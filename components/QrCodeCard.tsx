@@ -12,19 +12,19 @@ export default function QrCodeCard({ url }: QrCodeCardProps) {
   }
 
   return (
-    <div className="bg-white/20 backdrop-blur-lg rounded-2xl shadow-lg border border-white/30 p-8 text-center animate-fadeIn" style={{animationDelay: '0.4s'}}>
-      <h3 className="font-bold text-white mb-6 text-2xl flex items-center justify-center">
-        <span className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mr-3">
-          <span className="text-white text-sm">📱</span>
+    <div className="paper-card p-8 text-center animate-fadeIn" style={{animationDelay: '0.4s'}}>
+      <h3 className="handwriting-bold text-blue-900 mb-6 text-2xl flex items-center justify-center">
+        <span className="w-8 h-8 bg-blue-100 border-2 border-blue-300 rounded-lg flex items-center justify-center mr-3 shadow-sm">
+          <span className="text-blue-900 text-sm">📱</span>
         </span>
         Scan QR
       </h3>
-      <div className="p-4 bg-white/80 rounded-xl inline-block shadow-inner">
+      <div className="p-4 bg-white border-2 border-blue-200 rounded-lg inline-block shadow-sm">
         <QRCodeCanvas
           value={url}
           size={192} // Smaller size for the sidebar
           bgColor={"#ffffff"} 
-          fgColor={"#111827"}
+          fgColor={"#1e3a8a"}
           level={"L"}
           includeMargin={true}
         />

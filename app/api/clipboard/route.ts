@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClipboard, getClipboard, cleanupExpiredClipboards } from '@/lib/storage-mongodb';
+import { createClipboard, getClipboard, getAllClipboards, cleanupExpiredClipboards } from '@/lib/storage-mongodb';
 
 export const runtime = 'nodejs';
 
@@ -30,16 +30,27 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
+    const all = searchParams.get('all');
     
+    // Run cleanup on each request
+    cleanupExpiredClipboards();
+    
+    // If 'all' parameter is present, return all clipboards
+    if (all === 'true') {
+      const clipboards = await getAllClipboards();
+      return NextResponse.json({
+        success: true,
+        clipboards,
+      });
+    }
+    
+    // Otherwise, require an ID
     if (!id) {
       return NextResponse.json(
         { success: false, error: 'Clipboard ID is required' },
         { status: 400 }
       );
     }
-    
-    // Run cleanup on each request
-    cleanupExpiredClipboards();
     
     const clipboard = await getClipboard(id);
     

@@ -1,4 +1,3 @@
-import { nanoid } from 'nanoid';
 import connectDB from './mongodb';
 import Clipboard, { IClipboard, IClipboardFile } from '@/models/Clipboard';
 
@@ -25,9 +24,27 @@ export interface UploadedFile {
   mimeType: string;
 }
 
-// Generate unique ID
-export function generateId(): string {
-  return nanoid(8);
+// Generate unique 4-digit numeric ID
+export async function generateId(): Promise<string> {
+  await connectDB();
+  let attempts = 0;
+  const maxAttempts = 100; // Prevent infinite loop
+  
+  while (attempts < maxAttempts) {
+    // Generate a random 4-digit number (0000-9999)
+    const id = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    
+    // Check if ID already exists
+    const existing = await Clipboard.findOne({ id });
+    if (!existing) {
+      return id;
+    }
+    
+    attempts++;
+  }
+  
+  // Fallback: if we can't find a unique ID after max attempts, throw error
+  throw new Error('Unable to generate unique clipboard ID');
 }
 
 // Get clipboard data
@@ -67,7 +84,7 @@ export async function getClipboard(id: string): Promise<ClipboardData | null> {
 
 // Create new clipboard
 export async function createClipboard(content: string = ''): Promise<ClipboardData> {
-  const id = generateId();
+  const id = await generateId();
   const now = new Date();
   const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
   
@@ -191,6 +208,36 @@ export async function getAllClipboardIds(): Promise<string[]> {
     return clipboards.map(c => c.id);
   } catch (error) {
     console.error('Error getting clipboard IDs:', error);
+    return [];
+  }
+}
+
+// Get all clipboards (sorted by most recent)
+export async function getAllClipboards(limit: number = 50): Promise<ClipboardData[]> {
+  try {
+    await connectDB();
+    
+    const clipboards = await Clipboard.find({})
+      .sort({ createdAt: -1 }) // Most recent first
+      .limit(limit)
+      .select('id content files createdAt lastAccessed expiresAt');
+    
+    return clipboards.map(clipboard => ({
+      id: clipboard.id,
+      content: clipboard.content,
+      files: clipboard.files.map((file: IClipboardFile) => ({
+        filename: file.filename,
+        originalName: file.originalName,
+        size: file.size,
+        uploadTime: file.uploadTime.toISOString(),
+        mimeType: file.mimeType
+      })),
+      createdAt: clipboard.createdAt.toISOString(),
+      lastAccessed: clipboard.lastAccessed.toISOString(),
+      expiresAt: clipboard.expiresAt.toISOString()
+    }));
+  } catch (error) {
+    console.error('Error getting all clipboards:', error);
     return [];
   }
 }
