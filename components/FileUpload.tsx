@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 
 interface FileUploadProps {
-  onFileUpload: (file: File) => void;
+  onFileUpload: (files: File[]) => void;
 }
 
 export default function FileUpload({ onFileUpload }: FileUploadProps) {
@@ -25,32 +25,47 @@ export default function FileUpload({ onFileUpload }: FileUploadProps) {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFile(e.dataTransfer.files[0]);
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFiles(Array.from(e.dataTransfer.files));
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
-    if (e.target.files && e.target.files[0]) {
-      handleFile(e.target.files[0]);
+    if (e.target.files && e.target.files.length > 0) {
+      handleFiles(Array.from(e.target.files));
     }
   };
 
-  const handleFile = async (file: File) => {
-    // Check file size (50MB limit)
-    if (file.size > 50 * 1024 * 1024) {
-      alert('File size exceeds 50MB limit');
+  const handleFiles = async (files: File[]) => {
+    const validFiles: File[] = [];
+    const oversizedFiles: string[] = [];
+
+    // Validate all files
+    for (const file of files) {
+      if (file.size > 50 * 1024 * 1024) {
+        oversizedFiles.push(file.name);
+      } else {
+        validFiles.push(file);
+      }
+    }
+
+    // Alert about oversized files
+    if (oversizedFiles.length > 0) {
+      alert(`The following files exceed the 50MB limit and were skipped:\n${oversizedFiles.join('\n')}`);
+    }
+
+    if (validFiles.length === 0) {
       return;
     }
 
     setUploading(true);
     try {
-      onFileUpload(file);
+      onFileUpload(validFiles);
     } catch (error) {
-      console.error('Error uploading file:', error);
-      alert('Failed to upload file');
+      console.error('Error uploading files:', error);
+      alert('Failed to upload files');
     } finally {
       setUploading(false);
       // Reset file input
@@ -95,7 +110,7 @@ export default function FileUpload({ onFileUpload }: FileUploadProps) {
             disabled={uploading}
             className="notebook-button text-blue-900 py-2 px-4 disabled:opacity-50 disabled:cursor-not-allowed handwriting-bold"
           >
-            {uploading ? 'Uploading...' : 'Choose File'}
+            {uploading ? 'Uploading...' : 'Choose Files'}
           </button>
         </div>
       </div>
@@ -106,6 +121,7 @@ export default function FileUpload({ onFileUpload }: FileUploadProps) {
         onChange={handleChange}
         className="hidden"
         accept="*/*"
+        multiple
       />
 
       <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4 shadow-sm">
