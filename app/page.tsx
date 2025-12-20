@@ -195,6 +195,7 @@ export default function Home() {
 
 
 
+
       {/* Subtitle */}
 
       <p className="text-2xl text-blue-800 max-w-3xl mx-auto leading-relaxed text-center -mt-12 mb-12 handwriting">
@@ -202,8 +203,6 @@ export default function Home() {
         Share text and files between devices with a unique ID
 
       </p>
-
-
 
       <div className="grid lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
 

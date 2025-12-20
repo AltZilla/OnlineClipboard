@@ -14,6 +14,7 @@ export interface IClipboard extends Document {
   content: string;
   files: IClipboardFile[];
   isPublic: boolean;
+  sentToReceiveCode?: string; // If sent to a specific receive code
   createdAt: Date;
   lastAccessed: Date;
   expiresAt: Date;
@@ -29,31 +30,36 @@ const ClipboardFileSchema = new Schema<IClipboardFile>({
 }, { _id: false });
 
 const ClipboardSchema = new Schema<IClipboard>({
-  id: { 
-    type: String, 
-    required: true, 
+  id: {
+    type: String,
+    required: true,
     unique: true,
-    index: true 
+    index: true
   },
-  content: { 
-    type: String, 
-    default: '' 
+  content: {
+    type: String,
+    default: ''
   },
   files: [ClipboardFileSchema],
   isPublic: {
     type: Boolean,
     default: false
   },
-  createdAt: { 
-    type: Date, 
-    default: Date.now 
+  sentToReceiveCode: {
+    type: String,
+    index: true,
+    sparse: true // Only index documents that have this field
   },
-  lastAccessed: { 
-    type: Date, 
-    default: Date.now 
+  createdAt: {
+    type: Date,
+    default: Date.now
   },
-  expiresAt: { 
-    type: Date, 
+  lastAccessed: {
+    type: Date,
+    default: Date.now
+  },
+  expiresAt: {
+    type: Date,
     default: () => new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours from now
   }
 }, {
@@ -63,8 +69,11 @@ const ClipboardSchema = new Schema<IClipboard>({
 // Index for automatic cleanup
 ClipboardSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
+// Index for inbox queries
+ClipboardSchema.index({ sentToReceiveCode: 1, createdAt: -1 });
+
 // Update lastAccessed on find operations
-ClipboardSchema.pre('findOneAndUpdate', function() {
+ClipboardSchema.pre('findOneAndUpdate', function () {
   this.set({ lastAccessed: new Date() });
 });
 
@@ -74,3 +83,4 @@ if (mongoose.models.Clipboard) {
 }
 
 export default mongoose.model<IClipboard>('Clipboard', ClipboardSchema);
+
