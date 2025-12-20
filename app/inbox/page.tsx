@@ -175,7 +175,7 @@ export default function InboxPage() {
                     <div className="text-5xl mb-4">📭</div>
                     <h3 className="text-xl handwriting-bold text-blue-900 mb-2">No Messages Yet</h3>
                     <p className="text-blue-700 handwriting mb-4">
-                        When someone sends files to your receive code, they'll appear here.
+                        When someone sends files to your receive code, they&apos;ll appear here.
                     </p>
                     <p className="text-sm text-blue-600 handwriting">
                         Share your link: <code className="bg-blue-100 px-2 py-1 rounded font-mono">/send/{receiveCode}</code>

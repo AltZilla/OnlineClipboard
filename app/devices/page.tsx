@@ -66,7 +66,7 @@ export default function DevicesPage() {
                         </li>
                         <li className="flex items-start space-x-3">
                             <span className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold text-blue-700">2</span>
-                            <span>You'll get a personal link and QR code</span>
+                            <span>You&apos;ll get a personal link and QR code</span>
                         </li>
                         <li className="flex items-start space-x-3">
                             <span className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold text-blue-700">3</span>
@@ -90,9 +90,9 @@ export default function DevicesPage() {
                     Install Online Clipboard for the best experience:
                 </p>
                 <ul className="space-y-2 text-green-700 handwriting text-sm">
-                    <li><strong>Chrome (Android/Desktop):</strong> Menu → "Install App"</li>
-                    <li><strong>Safari (iOS):</strong> Share → "Add to Home Screen"</li>
-                    <li><strong>Edge:</strong> Menu → "Apps" → "Install"</li>
+                    <li><strong>Chrome (Android/Desktop):</strong> Menu → Install App</li>
+                    <li><strong>Safari (iOS):</strong> Share → Add to Home Screen</li>
+                    <li><strong>Edge:</strong> Menu → Apps → Install</li>
                 </ul>
             </div>
         </div>

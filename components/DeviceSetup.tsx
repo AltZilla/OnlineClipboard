@@ -111,8 +111,8 @@ export default function DeviceSetup({ onComplete }: DeviceSetupProps) {
                         <button
                             onClick={handleCopyLink}
                             className={`px-4 py-2 rounded-lg handwriting-bold transition-all ${copied
-                                    ? 'bg-green-500 text-white'
-                                    : 'bg-purple-600 hover:bg-purple-700 text-white'
+                                ? 'bg-green-500 text-white'
+                                : 'bg-purple-600 hover:bg-purple-700 text-white'
                                 }`}
                         >
                             {copied ? '✓ Copied!' : '📋 Copy'}
@@ -171,7 +171,7 @@ export default function DeviceSetup({ onComplete }: DeviceSetupProps) {
                     <ol className="text-sm text-yellow-700 handwriting space-y-1">
                         <li>1. Share your link or QR code</li>
                         <li>2. Anyone can send files to you from any device</li>
-                        <li>3. You'll get a notification when files arrive</li>
+                        <li>3. You&apos;ll get a notification when files arrive</li>
                     </ol>
                 </div>
             </div>

@@ -56,7 +56,7 @@ export default function SendPage() {
                     </li>
                     <li className="flex items-start space-x-3">
                         <span className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold text-blue-700">4</span>
-                        <span>They'll receive a notification instantly!</span>
+                        <span>They&apos;ll receive a notification instantly!</span>
                     </li>
                 </ol>
             </div>
@@ -64,7 +64,7 @@ export default function SendPage() {
             {/* Alternative */}
             <div className="mt-6 text-center">
                 <p className="text-sm text-blue-600 handwriting">
-                    Don't have their code? Ask them to share their link or QR code with you.
+                    Don&apos;t have their code? Ask them to share their link or QR code with you.
                 </p>
             </div>
         </div>

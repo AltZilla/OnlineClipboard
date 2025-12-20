@@ -28,6 +28,7 @@ export default function SendToDevicePage() {
         if (code) {
             checkDevice();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [code]);
 
     const checkDevice = async () => {
@@ -130,7 +131,7 @@ export default function SendToDevicePage() {
                     <div className="text-red-500 text-5xl mb-4">❌</div>
                     <h2 className="text-2xl handwriting-bold text-blue-900 mb-4">Device Not Found</h2>
                     <p className="text-blue-800 mb-6 handwriting">
-                        No device is registered with the code "<code className="font-mono bg-blue-100 px-2 py-1 rounded">{code}</code>"
+                        No device is registered with the code <code className="font-mono bg-blue-100 px-2 py-1 rounded">{code}</code>
                     </p>
                     <p className="text-blue-700 text-sm handwriting mb-6">
                         Make sure the device owner has set up their receive code correctly.
@@ -157,7 +158,7 @@ export default function SendToDevicePage() {
                     </p>
                     {device.hasPush && (
                         <p className="text-green-600 text-sm handwriting mb-4">
-                            🔔 They'll receive a notification!
+                            🔔 They&apos;ll receive a notification!
                         </p>
                     )}
 
