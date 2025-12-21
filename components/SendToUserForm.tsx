@@ -58,7 +58,7 @@ export default function SendToUserForm() {
                         type="text"
                         value={receiveCode}
                         onChange={(e) => {
-                            setReceiveCode(e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, ''));
+                            setReceiveCode(e.target.value.replace(/[^a-zA-Z0-9-_]/g, ''));
                             setError('');
                         }}
                         placeholder="e.g., lakshman"

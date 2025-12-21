@@ -10,13 +10,16 @@ export async function GET(request: NextRequest) {
         await connectDB();
 
         const { searchParams } = new URL(request.url);
-        const receiveCode = searchParams.get('receiveCode')?.toLowerCase().trim();
+        const receiveCode = searchParams.get('receiveCode')?.trim();
 
         if (!receiveCode) {
             return NextResponse.json({ success: false, error: 'Receive code required' }, { status: 400 });
         }
 
-        const device = await Device.findOne({ receiveCode });
+        // Case-insensitive search
+        const device = await Device.findOne({
+            receiveCode: { $regex: new RegExp(`^${receiveCode}$`, 'i') }
+        });
 
         if (!device) {
             return NextResponse.json({ success: false, error: 'Device not found' }, { status: 404 });
@@ -41,7 +44,7 @@ export async function GET(request: NextRequest) {
     }
 }
 
-// POST - Register a new device with receive code (or reclaim existing)
+// POST - Register a new device with receive code
 export async function POST(request: NextRequest) {
     try {
         await connectDB();
@@ -56,7 +59,8 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const cleanCode = receiveCode.toLowerCase().trim().replace(/[^a-z0-9-_]/g, '');
+        // Clean the code but preserve case
+        const cleanCode = receiveCode.trim().replace(/[^a-zA-Z0-9-_]/g, '');
 
         // Validate receive code
         if (cleanCode.length < 3) {
@@ -73,28 +77,28 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Use upsert - create if doesn't exist, update if exists
-        // This allows users to "reclaim" a code if they cleared their browser data
-        const device = await Device.findOneAndUpdate(
-            { receiveCode: cleanCode },
-            {
-                $set: {
-                    deviceName: deviceName || 'My Device',
-                    lastSeen: new Date()
-                },
-                $setOnInsert: {
-                    receiveCode: cleanCode,
-                    createdAt: new Date()
-                }
-            },
-            { upsert: true, new: true }
-        );
+        // Check if code is already taken (case-insensitive check)
+        const existingDevice = await Device.findOne({
+            receiveCode: { $regex: new RegExp(`^${cleanCode}$`, 'i') }
+        });
 
-        // If pushSubscription provided, update it
-        if (pushSubscription) {
-            device.pushSubscription = pushSubscription;
-            await device.save();
+        if (existingDevice) {
+            return NextResponse.json(
+                { success: false, error: 'This receive code is already taken. Please choose a different one.' },
+                { status: 409 }
+            );
         }
+
+        // Create new device
+        const device = new Device({
+            receiveCode: cleanCode,
+            deviceName: deviceName || 'My Device',
+            pushSubscription: pushSubscription || undefined,
+            lastSeen: new Date(),
+            createdAt: new Date()
+        });
+
+        await device.save();
 
         return NextResponse.json({
             success: true,
@@ -106,6 +110,15 @@ export async function POST(request: NextRequest) {
         });
     } catch (error: any) {
         console.error('Error registering device:', error);
+
+        // Handle duplicate key error
+        if (error.code === 11000) {
+            return NextResponse.json(
+                { success: false, error: 'This receive code is already taken. Please choose a different one.' },
+                { status: 409 }
+            );
+        }
+
         return NextResponse.json({ success: false, error: 'Failed to register device' }, { status: 500 });
     }
 }
@@ -122,7 +135,11 @@ export async function PUT(request: NextRequest) {
             return NextResponse.json({ success: false, error: 'Receive code required' }, { status: 400 });
         }
 
-        const device = await Device.findOne({ receiveCode: receiveCode.toLowerCase().trim() });
+        // Case-insensitive search
+        const cleanCode = receiveCode.trim();
+        const device = await Device.findOne({
+            receiveCode: { $regex: new RegExp(`^${cleanCode}$`, 'i') }
+        });
 
         if (!device) {
             return NextResponse.json({ success: false, error: 'Device not found' }, { status: 404 });
@@ -155,13 +172,16 @@ export async function DELETE(request: NextRequest) {
         await connectDB();
 
         const { searchParams } = new URL(request.url);
-        const receiveCode = searchParams.get('receiveCode')?.toLowerCase().trim();
+        const receiveCode = searchParams.get('receiveCode')?.trim();
 
         if (!receiveCode) {
             return NextResponse.json({ success: false, error: 'Receive code required' }, { status: 400 });
         }
 
-        await Device.deleteOne({ receiveCode });
+        // Case-insensitive delete
+        await Device.deleteOne({
+            receiveCode: { $regex: new RegExp(`^${receiveCode}$`, 'i') }
+        });
 
         return NextResponse.json({ success: true, message: 'Device unregistered' });
     } catch (error) {

@@ -222,7 +222,7 @@ export default function DeviceSetup({ onComplete }: DeviceSetupProps) {
                     <input
                         type="text"
                         value={code}
-                        onChange={(e) => setCode(e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, ''))}
+                        onChange={(e) => setCode(e.target.value.replace(/[^a-zA-Z0-9-_]/g, ''))}
                         placeholder="e.g., lakshman, myphone, work-files"
                         className="w-full px-4 py-3 bg-white border-2 border-blue-300 rounded-lg text-blue-900 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-500 handwriting shadow-sm font-mono"
                         maxLength={30}

@@ -44,8 +44,10 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Get the target device
-        const device = await Device.findOne({ receiveCode: receiveCode.toLowerCase().trim() });
+        // Get the target device (case-insensitive)
+        const device = await Device.findOne({
+            receiveCode: { $regex: new RegExp(`^${receiveCode.trim()}$`, 'i') }
+        });
         console.log('[PUSH DEBUG] Device found:', !!device);
 
         if (!device) {

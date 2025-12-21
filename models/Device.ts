@@ -1,8 +1,8 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-// Simplified device model - just a receive code linked to push subscription
+// Device model - one device per receive code
 export interface IDevice extends Document {
-    receiveCode: string; // User's personal receive code (e.g., "lakshman123")
+    receiveCode: string; // User's personal receive code - must be unique
     deviceName: string; // User-friendly name like "My Phone"
     pushSubscription?: {
         endpoint: string;
@@ -21,7 +21,6 @@ const DeviceSchema = new Schema<IDevice>({
         required: true,
         unique: true,
         index: true,
-        lowercase: true,
         trim: true
     },
     deviceName: {
@@ -54,3 +53,5 @@ if (mongoose.models.Device) {
 }
 
 export default mongoose.model<IDevice>('Device', DeviceSchema);
+
+
