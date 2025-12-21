@@ -249,9 +249,20 @@ export default function DeviceModal() {
                                     </div>
 
                                     <div className="mt-4 pt-4 border-t border-blue-100">
-                                        <p className="text-xs text-blue-600 handwriting text-center">
+                                        <p className="text-xs text-blue-600 handwriting text-center mb-3">
                                             💡 Anyone with your link can send you files from any device
                                         </p>
+
+                                        {/* Send Files button - works without setup */}
+                                        <button
+                                            onClick={() => {
+                                                setIsOpen(false);
+                                                router.push('/send');
+                                            }}
+                                            className="w-full py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg handwriting-bold text-sm transition-colors"
+                                        >
+                                            📤 Send Files to Someone
+                                        </button>
                                     </div>
                                 </>
                             )}

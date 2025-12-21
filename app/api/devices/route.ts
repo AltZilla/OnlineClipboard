@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     }
 }
 
-// POST - Register a new device with receive code
+// POST - Register a new device with receive code (or reclaim existing)
 export async function POST(request: NextRequest) {
     try {
         await connectDB();
@@ -73,24 +73,28 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Check if code already exists
-        const existing = await Device.findOne({ receiveCode: cleanCode });
+        // Use upsert - create if doesn't exist, update if exists
+        // This allows users to "reclaim" a code if they cleared their browser data
+        const device = await Device.findOneAndUpdate(
+            { receiveCode: cleanCode },
+            {
+                $set: {
+                    deviceName: deviceName || 'My Device',
+                    lastSeen: new Date()
+                },
+                $setOnInsert: {
+                    receiveCode: cleanCode,
+                    createdAt: new Date()
+                }
+            },
+            { upsert: true, new: true }
+        );
 
-        if (existing) {
-            return NextResponse.json(
-                { success: false, error: 'This receive code is already taken. Please choose another.' },
-                { status: 409 }
-            );
+        // If pushSubscription provided, update it
+        if (pushSubscription) {
+            device.pushSubscription = pushSubscription;
+            await device.save();
         }
-
-        // Create new device
-        const device = await Device.create({
-            receiveCode: cleanCode,
-            deviceName: deviceName || 'My Device',
-            pushSubscription,
-            lastSeen: new Date(),
-            createdAt: new Date()
-        });
 
         return NextResponse.json({
             success: true,
@@ -102,12 +106,6 @@ export async function POST(request: NextRequest) {
         });
     } catch (error: any) {
         console.error('Error registering device:', error);
-        if (error.code === 11000) {
-            return NextResponse.json(
-                { success: false, error: 'This receive code is already taken' },
-                { status: 409 }
-            );
-        }
         return NextResponse.json({ success: false, error: 'Failed to register device' }, { status: 500 });
     }
 }
