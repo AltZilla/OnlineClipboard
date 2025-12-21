@@ -107,12 +107,12 @@ export async function POST(request: NextRequest) {
                 });
 
                 console.log('[PUSH DEBUG] Sending push notification with payload:', payload);
-                console.log('[PUSH DEBUG] Push subscription endpoint:', device.pushSubscription.endpoint);
+                console.log('[PUSH DEBUG] Push subscription endpoint:', device.pushSubscription?.endpoint);
 
                 await webpush.sendNotification(
                     {
-                        endpoint: device.pushSubscription.endpoint,
-                        keys: device.pushSubscription.keys
+                        endpoint: device.pushSubscription!.endpoint,
+                        keys: device.pushSubscription!.keys
                     },
                     payload
                 );
