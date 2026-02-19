@@ -46,15 +46,15 @@ export default function ClipboardForm({
           onChange={(e) => setContent(e.target.value)}
           placeholder={placeholder}
           rows={8}
-          className="w-full px-4 py-4 bg-white border-2 border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-500 resize-none text-lg transition-all duration-200 hover:border-blue-400 shadow-sm"
+          className="w-full mb-4"
         />
       </div>
-      
+
       <div className="flex space-x-4">
         <button
           type="submit"
           disabled={loading}
-          className="flex-1 notebook-button text-blue-900 py-4 px-6 disabled:opacity-50 disabled:cursor-not-allowed text-lg handwriting-bold disabled:hover:transform-none"
+          className="flex-1 notebook-button text-blue-900 py-4 px-6 text-lg handwriting-bold"
         >
           {loading ? (
             <div className="flex items-center justify-center">
@@ -65,7 +65,7 @@ export default function ClipboardForm({
             buttonText
           )}
         </button>
-        
+
         {content && (
           <button
             type="button"

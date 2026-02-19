@@ -23,8 +23,8 @@ export default function RootLayout({
         <div className="star-decoration star-1">⭐</div>
         <div className="star-decoration star-2">✨</div>
         <div className="star-decoration star-3">💫</div>
-        
-        <main className="relative w-full px-4 sm:px-6 lg:px-8 py-8 pt-16 sm:pt-24 z-10">
+
+        <main className="main-container relative py-4 z-10 pt-responsive">
           {children}
         </main>
       </body>

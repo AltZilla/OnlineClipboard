@@ -181,7 +181,7 @@ export default function Home() {
 
       <div className="text-center mb-12 animate-fadeIn py-4">
 
-        <div className="inline-block paper-card px-8 py-4">
+        <div className="inline-block paper-card title-padding">
 
           <h1 className="text-5xl handwriting-bold text-blue-900">
 
@@ -197,7 +197,7 @@ export default function Home() {
 
       {/* Subtitle */}
 
-      <p className="text-2xl text-blue-800 max-w-3xl mx-auto leading-relaxed text-center -mt-12 mb-12 handwriting">
+      <p className="subtitle handwriting">
 
         Share text and files between devices with a unique ID
 
@@ -205,15 +205,15 @@ export default function Home() {
 
 
 
-      <div className="grid lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+      <div className="grid-2-cols gap-8 w-full">
 
         {/* Create New Clipboard */}
 
-        <div className="paper-card p-8 animate-slideIn">
+        <div className="paper-card animate-slideIn">
 
           <div className="flex items-center mb-6">
 
-            <div className="w-12 h-12 bg-yellow-100 border-2 border-yellow-300 rounded-lg flex items-center justify-center mr-4 shadow-md">
+            <div className="icon-container icon-yellow mr-4">
 
               <span className="text-2xl">✨</span>
 
@@ -255,14 +255,14 @@ export default function Home() {
             <button
               type="button"
               onClick={() => setIsPublic(!isPublic)}
-              className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 ${isPublic ? 'bg-blue-600' : 'bg-gray-300'
+              className={`toggle-switch-btn ${isPublic ? 'toggle-bg-on' : 'toggle-bg-off'
                 }`}
               role="switch"
               aria-checked={isPublic}
               aria-label="Toggle public visibility"
             >
               <span
-                className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${isPublic ? 'translate-x-7' : 'translate-x-1'
+                className={`toggle-dot ${isPublic ? 'toggle-dot-on' : 'toggle-dot-off'
                   }`}
               />
             </button>
@@ -274,9 +274,9 @@ export default function Home() {
 
             <h3 className="text-xl handwriting-bold text-blue-900 mb-4 flex items-center">
 
-              <span className="w-8 h-8 bg-blue-100 border-2 border-blue-300 rounded-lg flex items-center justify-center mr-3 shadow-sm">
+              <span className="icon-container-sm icon-blue mr-3">
 
-                📁
+                <span className="text-sm">📁</span>
 
               </span>
 
@@ -304,7 +304,7 @@ export default function Home() {
 
                   {files.map((file, index) => (
 
-                    <div key={index} className="flex items-center justify-between bg-blue-50 border-2 border-blue-200 p-3 rounded-lg hover:bg-blue-100 transition-all duration-200 shadow-sm">
+                    <div key={index} className="list-item-container">
 
                       <div className="flex items-center space-x-3 truncate">
 
@@ -328,7 +328,7 @@ export default function Home() {
 
                         onClick={() => removeFile(index)}
 
-                        className="text-red-600 hover:text-red-700 text-lg hover:scale-110 transition-transform duration-200 handwriting-bold"
+                        className="close-button handwriting-bold"
 
                       >
 
@@ -354,11 +354,11 @@ export default function Home() {
 
         {/* Access Existing Clipboard */}
 
-        <div className="paper-card p-8 animate-fadeIn" style={{ animationDelay: '0.2s' }}>
+        <div className="paper-card animate-fadeIn" style={{ animationDelay: '0.2s' }}>
 
           <div className="flex items-center mb-6">
 
-            <div className="w-12 h-12 bg-green-100 border-2 border-green-300 rounded-lg flex items-center justify-center mr-4 shadow-md">
+            <div className="icon-container icon-green mr-4">
 
               <span className="text-2xl">🔍</span>
 
@@ -424,8 +424,8 @@ export default function Home() {
             {/* Recent Clipboards List */}
             <div className="mt-8">
               <h3 className="text-xl handwriting-bold text-blue-900 mb-4 flex items-center">
-                <span className="w-8 h-8 bg-green-100 border-2 border-green-300 rounded-lg flex items-center justify-center mr-3 shadow-sm">
-                  📋
+                <span className="icon-container-sm icon-green mr-3">
+                  <span className="text-sm">📋</span>
                 </span>
                 Recent Clipboards
               </h3>
@@ -441,7 +441,7 @@ export default function Home() {
                     <div
                       key={clipboard.id}
                       onClick={() => router.push(`/clipboard/${clipboard.id}`)}
-                      className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 hover:bg-blue-100 transition-all duration-200 shadow-sm cursor-pointer group"
+                      className="list-item-header group"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1 min-w-0">
@@ -467,7 +467,7 @@ export default function Home() {
                             e.stopPropagation();
                             router.push(`/clipboard/${clipboard.id}`);
                           }}
-                          className="ml-3 notebook-button text-blue-900 py-2 px-4 text-sm handwriting-bold opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="ml-3 notebook-button text-blue-900 py-2 px-4 text-sm handwriting-bold opacity-0 group-hover-opacity-100 transition-opacity"
                         >
                           Open →
                         </button>

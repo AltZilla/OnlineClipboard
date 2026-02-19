@@ -40,8 +40,8 @@ export default function ParticlesBackground() {
           width: 1,
         },
         move: {
-            enable: true,
-            speed: 0.5,
+          enable: true,
+          speed: 0.5,
         }
       },
       interactivity: {
@@ -59,7 +59,7 @@ export default function ParticlesBackground() {
           grab: {
             distance: 200,
             links: {
-                opacity: 1
+              opacity: 1
             }
           },
           push: {
@@ -78,7 +78,7 @@ export default function ParticlesBackground() {
         id="tsparticles"
         particlesLoaded={particlesLoaded}
         options={options}
-        className="fixed top-0 left-0 w-full h-full z-[-1]"
+        className="particles-bg"
       />
     );
   }

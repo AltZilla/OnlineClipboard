@@ -1,4 +1,12 @@
 import mongoose from 'mongoose';
+import dns from 'dns';
+
+// Workaround for DNS issues on some Windows environments
+try {
+  dns.setServers(['8.8.8.8', '8.8.4.4']);
+} catch (e) {
+  // Ignore if this fails
+}
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/online-clipboard';
 

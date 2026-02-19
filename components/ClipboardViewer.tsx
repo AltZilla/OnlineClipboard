@@ -10,11 +10,11 @@ export default function ClipboardViewer({ clipboard }: ClipboardViewerProps) {
   const handleDownloadFile = async (filename: string, originalName: string) => {
     try {
       const response = await fetch(`/api/clipboard/${clipboard.id}/file/${filename}`);
-      
+
       if (!response.ok) {
         throw new Error('Failed to download file');
       }
-      
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -63,10 +63,10 @@ export default function ClipboardViewer({ clipboard }: ClipboardViewerProps) {
   return (
     <div className="space-y-8">
       {/* Text Content */}
-      <div className="paper-card p-8 animate-fadeIn">
+      <div className="paper-card animate-fadeIn">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-2xl handwriting-bold text-blue-900 flex items-center">
-            <span className="w-8 h-8 bg-blue-100 border-2 border-blue-300 rounded-lg flex items-center justify-center mr-3 shadow-sm">
+            <span className="icon-container-sm icon-blue mr-3">
               <span className="text-blue-900 text-sm">📝</span>
             </span>
             Text Content
@@ -80,15 +80,15 @@ export default function ClipboardViewer({ clipboard }: ClipboardViewerProps) {
             </button>
           )}
         </div>
-        
+
         {clipboard.content ? (
-          <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 shadow-inner">
+          <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 shadow-inner">
             <pre className="whitespace-pre-wrap text-blue-900 text-base leading-relaxed font-sans">
               {clipboard.content}
             </pre>
           </div>
         ) : (
-          <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-12 text-center">
+          <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-8 text-center">
             <div className="text-blue-400 text-4xl mb-4 floating">📝</div>
             <p className="text-blue-700 text-lg handwriting">No text content</p>
           </div>
@@ -96,24 +96,24 @@ export default function ClipboardViewer({ clipboard }: ClipboardViewerProps) {
       </div>
 
       {/* Files */}
-      <div className="paper-card p-8 animate-fadeIn" style={{animationDelay: '0.2s'}}>
+      <div className="paper-card animate-fadeIn" style={{ animationDelay: '0.2s' }}>
         <h3 className="text-2xl handwriting-bold text-blue-900 mb-6 flex items-center">
-          <span className="w-8 h-8 bg-blue-100 border-2 border-blue-300 rounded-lg flex items-center justify-center mr-3 shadow-sm">
+          <span className="icon-container-sm icon-blue mr-3">
             <span className="text-blue-900 text-sm">📁</span>
           </span>
           Files ({clipboard.files?.length || 0})
         </h3>
-        
+
         {clipboard.files && clipboard.files.length > 0 ? (
           <div className="space-y-4">
             {clipboard.files.map((file, index) => (
               <div
                 key={index}
-                className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 flex items-center justify-between shadow-sm hover:bg-blue-100 transition-all duration-300 transform hover:-translate-y-1 animate-slideIn"
-                style={{animationDelay: `${index * 0.1}s`}}
+                className="list-item-container animate-slideIn"
+                style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div className="flex items-center space-x-4 truncate">
-                  <div className="text-3xl floating" style={{animationDelay: `${index * 0.2}s`}}>
+                  <div className="text-3xl floating" style={{ animationDelay: `${index * 0.2}s` }}>
                     {getFileIcon(file.originalName)}
                   </div>
                   <div className="truncate">
@@ -123,7 +123,7 @@ export default function ClipboardViewer({ clipboard }: ClipboardViewerProps) {
                     </p>
                   </div>
                 </div>
-                
+
                 <button
                   onClick={() => handleDownloadFile(file.filename, file.originalName)}
                   className="notebook-button text-blue-900 py-2 px-5 text-lg handwriting-bold ml-4"
@@ -134,7 +134,7 @@ export default function ClipboardViewer({ clipboard }: ClipboardViewerProps) {
             ))}
           </div>
         ) : (
-          <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-12 text-center">
+          <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-8 text-center">
             <div className="text-blue-400 text-4xl mb-4 floating">📁</div>
             <p className="text-blue-700 text-lg handwriting">No files uploaded</p>
           </div>
@@ -148,7 +148,7 @@ export default function ClipboardViewer({ clipboard }: ClipboardViewerProps) {
 
 function getFileIcon(filename: string): string {
   const extension = filename.split('.').pop()?.toLowerCase();
-  
+
   switch (extension) {
     case 'pdf':
       return '📄';
