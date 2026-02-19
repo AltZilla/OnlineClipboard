@@ -12,14 +12,14 @@ export default function QrCodeCard({ url }: QrCodeCardProps) {
   }
 
   return (
-    <div className="paper-card text-center animate-fadeIn" style={{ animationDelay: '0.4s' }}>
-      <h3 className="handwriting-bold text-blue-900 mb-6 text-2xl flex items-center justify-center">
-        <span className="icon-container-sm icon-blue mr-3">
+    <div className="qr-card">
+      <h3 className="qr-title">
+        <span className="viewer-icon">
           <span className="text-blue-900 text-sm">📱</span>
         </span>
         Scan QR
       </h3>
-      <div className="p-4 bg-white border-2 border-blue-200 rounded-lg inline-block shadow-sm">
+      <div className="qr-container">
         <QRCodeCanvas
           value={url}
           size={192} // Smaller size for the sidebar

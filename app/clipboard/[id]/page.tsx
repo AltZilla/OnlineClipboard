@@ -121,65 +121,65 @@ export default function ClipboardPage() {
   }
 
   return (
-    <div className="w-full">
+    <div className="clipboard-page-container">
       {/* Title */}
-      <div className="text-center mb-12 animate-fadeIn py-4">
-        <div className="inline-block paper-card title-padding">
-          <h1 className="text-5xl handwriting-bold text-blue-900">
+      <div className="hero-section">
+        <div className="hero-card">
+          <h1 className="hero-title">
             📓 Clipboard
           </h1>
         </div>
       </div>
 
       {/* Subtitle */}
-      <p className="subtitle handwriting">
-        Viewing clipboard with ID: <code className="font-mono bg-blue-100 text-blue-900 p-1 rounded-md border border-blue-300">{id}</code>
+      <p className="clipboard-page-subtitle">
+        Viewing clipboard with ID: <code className="clipboard-id-badge">{id}</code>
       </p>
 
-      <div className="lg-grid-cols-3">
+      <div className="clipboard-layout">
         {/* Main Content */}
-        <div className="lg-col-span-2">
+        <div className="main-content-col">
           {clipboard && <ClipboardViewer clipboard={clipboard} />}
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-8 mt-8 lg-mt-0">
+        <div className="sidebar-col">
           {/* Details Card */}
-          <div className="paper-card animate-fadeIn" style={{ animationDelay: '0.2s' }}>
-            <h3 className="handwriting-bold text-blue-900 mb-6 text-2xl flex items-center">
-              <span className="icon-container-sm icon-blue mr-3">
+          <div className="details-card">
+            <h3 className="details-title">
+              <span className="viewer-icon">
                 <span className="text-blue-900 text-sm">ℹ️</span>
               </span>
               Details
             </h3>
 
             {/* Info Grid */}
-            <div className="grid-cols-1 gap-4 text-blue-900 mb-8 space-y-3">
-              <div className="list-item-container" style={{ justifyContent: 'flex-start' }}>
-                <span className="w-2 h-2 bg-green-400 rounded-full mr-3 flex-shrink-0"></span>
-                <div className="handwriting break-all"><span className="handwriting-bold">Created:</span> {formatDate(clipboard.createdAt)}</div>
+            <div className="details-grid">
+              <div className="detail-item">
+                <span className="status-dot dot-green"></span>
+                <div className="detail-text"><span className="handwriting-bold">Created:</span> {formatDate(clipboard.createdAt)}</div>
               </div>
-              <div className="list-item-container" style={{ justifyContent: 'flex-start' }}>
-                <span className="w-2 h-2 bg-yellow-400 rounded-full mr-3 flex-shrink-0"></span>
-                <div className="handwriting break-all"><span className="handwriting-bold">Last accessed:</span> {formatDate(clipboard.lastAccessed)}</div>
+              <div className="detail-item">
+                <span className="status-dot dot-yellow"></span>
+                <div className="detail-text"><span className="handwriting-bold">Last accessed:</span> {formatDate(clipboard.lastAccessed)}</div>
               </div>
-              <div className="list-item-container" style={{ justifyContent: 'flex-start' }}>
-                <span className="w-2 h-2 bg-red-400 rounded-full mr-3 flex-shrink-0"></span>
-                <div className="handwriting break-all"><span className="handwriting-bold">Expires:</span> {clipboard.expiresAt ? formatDate(clipboard.expiresAt) : 'Unknown'}</div>
+              <div className="detail-item">
+                <span className="status-dot dot-red"></span>
+                <div className="detail-text"><span className="handwriting-bold">Expires:</span> {clipboard.expiresAt ? formatDate(clipboard.expiresAt) : 'Unknown'}</div>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col gap-3">
+            <div className="sidebar-actions">
               <button
                 onClick={handleCopyId}
-                className="w-full text-center notebook-button text-blue-900 py-3 px-6 handwriting-bold"
+                className="btn-sidebar"
               >
                 📋 Copy ID
               </button>
               <button
                 onClick={handleShareUrl}
-                className="w-full text-center notebook-button text-blue-900 py-3 px-6 handwriting-bold"
+                className="btn-sidebar"
               >
                 🔗 Share URL
               </button>

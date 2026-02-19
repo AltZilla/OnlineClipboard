@@ -35,9 +35,9 @@ export default function ClipboardForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="clipboard-form">
       <div>
-        <label htmlFor="content" className="block text-lg handwriting-bold text-blue-900 mb-4">
+        <label htmlFor="content" className="form-label">
           Text Content
         </label>
         <textarea
@@ -46,19 +46,19 @@ export default function ClipboardForm({
           onChange={(e) => setContent(e.target.value)}
           placeholder={placeholder}
           rows={8}
-          className="w-full mb-4"
+          className="form-textarea"
         />
       </div>
 
-      <div className="flex space-x-4">
+      <div className="form-actions">
         <button
           type="submit"
           disabled={loading}
-          className="flex-1 notebook-button text-blue-900 py-4 px-6 text-lg handwriting-bold"
+          className="btn-primary"
         >
           {loading ? (
-            <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-900 mr-2"></div>
+            <div className="loading-wrapper">
+              <div className="loading-spinner"></div>
               Processing...
             </div>
           ) : (
@@ -70,7 +70,7 @@ export default function ClipboardForm({
           <button
             type="button"
             onClick={handleCopyToClipboard}
-            className="notebook-button text-blue-900 py-4 px-6 text-lg handwriting-bold"
+            className="btn-secondary"
           >
             📋 Copy
           </button>

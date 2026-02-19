@@ -88,27 +88,27 @@ export default function FileUpload({ onFileUpload }: FileUploadProps) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="file-upload-container">
       <div
-        className={`file-drop-zone ${dragActive ? 'drag-over' : ''}`}
+        className={`upload-zone ${dragActive ? 'drag-over' : ''}`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
       >
         <div className="text-center">
-          <div className="text-4xl mb-4">📁</div>
-          <p className="text-lg text-blue-900 mb-2 handwriting">
+          <div className="upload-icon">📁</div>
+          <p className="upload-text">
             Drag and drop files here, or click to select
           </p>
-          <p className="text-sm text-blue-700 mb-4 handwriting">
+          <p className="upload-subtext">
             Maximum file size: 50MB
           </p>
           <button
             type="button"
             onClick={onButtonClick}
             disabled={uploading}
-            className="notebook-button text-blue-900 py-2 px-4 disabled:opacity-50 disabled:cursor-not-allowed handwriting-bold"
+            className="btn-secondary"
           >
             {uploading ? 'Uploading...' : 'Choose Files'}
           </button>
@@ -119,14 +119,14 @@ export default function FileUpload({ onFileUpload }: FileUploadProps) {
         ref={fileInputRef}
         type="file"
         onChange={handleChange}
-        className="hidden"
+        className="hidden-input"
         accept="*/*"
         multiple
       />
 
-      <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4 shadow-sm">
-        <h4 className="handwriting-bold text-blue-900 mb-2">Upload Guidelines:</h4>
-        <ul className="text-sm text-blue-800 space-y-1 handwriting">
+      <div className="upload-guidelines">
+        <h4 className="guidelines-title">Upload Guidelines:</h4>
+        <ul className="guidelines-list">
           <li>• Maximum file size: 50MB</li>
           <li>• Supported formats: All file types</li>
           <li>• Files are stored securely and expire after 24 hours</li>
