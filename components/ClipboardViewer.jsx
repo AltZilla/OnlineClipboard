@@ -16,6 +16,13 @@ export default function ClipboardViewer({ clipboard }) {
     const [speechSpeed, setSpeechSpeed] = useState(1);
     const utteranceRef = useRef(null);
 
+    // Send to email state
+    const [showEmailForm, setShowEmailForm] = useState(false);
+    const [emailAccountId, setEmailAccountId] = useState('');
+    const [sendingEmail, setSendingEmail] = useState(false);
+    const [emailResult, setEmailResult] = useState(null);
+    const [emailError, setEmailError] = useState('');
+
     const indianCodes = ['ta', 'hi', 'te', 'kn', 'ml', 'mr', 'bn', 'gu', 'pa', 'ur', 'or', 'ne', 'si'];
 
     const langCodeMap = {
@@ -165,6 +172,38 @@ export default function ClipboardViewer({ clipboard }) {
         } catch (error) {
             console.error('Failed to copy text:', error);
             alert('Failed to copy text');
+        }
+    };
+
+    const handleSendEmail = async (e) => {
+        e.preventDefault();
+        if (!emailAccountId || emailAccountId.length !== 6) return;
+
+        setSendingEmail(true);
+        setEmailError('');
+        setEmailResult(null);
+
+        try {
+            const res = await fetch('/api/account/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    accountId: emailAccountId.trim(),
+                    clipboardId: clipboard.id
+                })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                setEmailResult(data.message);
+                setEmailAccountId('');
+            } else {
+                setEmailError(data.error || 'Failed to send email');
+            }
+        } catch (err) {
+            setEmailError('Something went wrong. Please try again.');
+        } finally {
+            setSendingEmail(false);
         }
     };
 
@@ -360,6 +399,82 @@ export default function ClipboardViewer({ clipboard }) {
                     </div>
                 )}
             </div>
+
+            {/* Send to Email Section */}
+            <div className="viewer-section email-send-section" style={{ animationDelay: '0.1s' }}>
+                <div className="viewer-header">
+                    <h3 className="viewer-title">
+                        <span className="viewer-icon">
+                            <span className="text-blue-900 text-sm">📧</span>
+                        </span>
+                        Send to Email
+                    </h3>
+                    <button
+                        onClick={() => {
+                            setShowEmailForm(!showEmailForm);
+                            setEmailResult(null);
+                            setEmailError('');
+                        }}
+                        className="btn-copy-text"
+                    >
+                        {showEmailForm ? '✕ Close' : '📧 Send to Email'}
+                    </button>
+                </div>
+
+                {showEmailForm && (
+                    <div className="email-form-container">
+                        <p className="email-form-desc">
+                            Enter a 6-digit Account ID to send this clipboard&apos;s content and files to the registered email.
+                        </p>
+                        <form onSubmit={handleSendEmail} className="email-inline-form">
+                            <input
+                                type="text"
+                                value={emailAccountId}
+                                onChange={(e) => {
+                                    const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                                    setEmailAccountId(val);
+                                    setEmailError('');
+                                    setEmailResult(null);
+                                }}
+                                placeholder="6-digit Account ID"
+                                className="email-id-input"
+                                maxLength={6}
+                                disabled={sendingEmail}
+                            />
+                            <button
+                                type="submit"
+                                className="email-send-btn"
+                                disabled={sendingEmail || emailAccountId.length !== 6}
+                            >
+                                {sendingEmail ? (
+                                    <>
+                                        <span className="btn-spinner"></span>
+                                        Sending...
+                                    </>
+                                ) : (
+                                    '📤 Send'
+                                )}
+                            </button>
+                        </form>
+
+                        {emailResult && (
+                            <div className="email-feedback email-feedback-success">
+                                ✅ {emailResult}
+                            </div>
+                        )}
+                        {emailError && (
+                            <div className="email-feedback email-feedback-error">
+                                ❌ {emailError}
+                            </div>
+                        )}
+
+                        <p className="email-form-hint">
+                            Don&apos;t have an Account ID? <a href="/account" className="email-link">Create one here →</a>
+                        </p>
+                    </div>
+                )}
+            </div>
+
             { }
             <div className="viewer-section" style={{ animationDelay: '0.2s' }}>
                 <h3 className="viewer-title mb-6">

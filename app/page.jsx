@@ -140,6 +140,30 @@ export default function Home() {
             <p className="hero-subtitle">
                 Share text and files between devices with a unique ID
             </p>
+            {/* Account link */}
+            <div style={{ textAlign: 'center', marginBottom: '2rem', marginTop: '-1.5rem' }}>
+                <a
+                    href="/account"
+                    className="account-home-link"
+                    style={{
+                        fontFamily: "'Kalam', cursive",
+                        fontSize: '1.05rem',
+                        color: '#1e40af',
+                        fontWeight: 700,
+                        textDecoration: 'none',
+                        background: '#eff6ff',
+                        border: '2px solid #bfdbfe',
+                        borderRadius: '8px',
+                        padding: '0.5rem 1.25rem',
+                        display: 'inline-block',
+                        transition: 'all 0.2s'
+                    }}
+                    onMouseOver={(e) => { e.target.style.background = '#dbeafe'; e.target.style.transform = 'translateY(-1px)'; }}
+                    onMouseOut={(e) => { e.target.style.background = '#eff6ff'; e.target.style.transform = 'translateY(0)'; }}
+                >
+                    📧 Email Account — Get clipboard content delivered to your inbox
+                </a>
+            </div>
             <div className="dashboard-grid">
                 { }
                 <div className="clipboard-card create-card">

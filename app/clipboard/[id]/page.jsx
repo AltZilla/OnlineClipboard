@@ -159,6 +159,12 @@ export default function ClipboardPage() {
                             >
                                 🔗 Share URL
                             </button>
+                            <button
+                                onClick={() => router.push('/account')}
+                                className="btn-sidebar"
+                            >
+                                📧 Email Account
+                            </button>
                         </div>
                     </div>
                     <QrCodeCard url={shareUrl} />
