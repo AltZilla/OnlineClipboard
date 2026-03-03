@@ -2456,3 +2456,32 @@ body::before {
     opacity: 0.7;
   }
 }
+
+/* Textarea border fix */
+.form-textarea {
+  width: 100%;
+  border: 2px solid var(--blue-200);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-family: 'Kalam', cursive;
+  font-size: 1rem;
+  color: var(--blue-900);
+  background: var(--blue-50);
+  resize: vertical;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--blue-500);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.form-textarea::placeholder {
+  color: var(--blue-300);
+}
+
+/* Hide native file input */
+.hidden-input {
+  display: none;
+}
