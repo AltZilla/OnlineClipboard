@@ -30,27 +30,26 @@ export default function Home() {
             if (data.success) {
                 const clipboardId = data.clipboard.id;
                 if (files.length > 0) {
-                    const failedUploads = [];
-                    for (const file of files) {
-                        const formData = new FormData();
-                        formData.append('file', file);
-                        try {
-                            const uploadResponse = await fetch(`/api/clipboard/${clipboardId}/upload`, {
-                                method: 'POST',
-                                body: formData,
-                            });
-                            if (!uploadResponse.ok) {
-                                const errorData = await uploadResponse.json().catch(() => ({}));
-                                const errorMessage = errorData.error || `HTTP ${uploadResponse.status}`;
-                                failedUploads.push({ name: file.name, error: errorMessage });
-                                console.warn(`Failed to upload file: ${file.name} - ${errorMessage}`);
+                    const uploadResults = await Promise.all(
+                        files.map(async (file) => {
+                            const formData = new FormData();
+                            formData.append('file', file);
+                            try {
+                                const uploadResponse = await fetch(`/api/clipboard/${clipboardId}/upload`, {
+                                    method: 'POST',
+                                    body: formData,
+                                });
+                                if (!uploadResponse.ok) {
+                                    const errorData = await uploadResponse.json().catch(() => ({}));
+                                    return { name: file.name, error: errorData.error || `HTTP ${uploadResponse.status}` };
+                                }
+                                return null;
+                            } catch (uploadError) {
+                                return { name: file.name, error: uploadError instanceof Error ? uploadError.message : 'Network error' };
                             }
-                        } catch (uploadError) {
-                            const errorMessage = uploadError instanceof Error ? uploadError.message : 'Network error';
-                            failedUploads.push({ name: file.name, error: errorMessage });
-                            console.error(`Error uploading file ${file.name}:`, uploadError);
-                        }
-                    }
+                        })
+                    );
+                    const failedUploads = uploadResults.filter(Boolean);
                     if (failedUploads.length > 0) {
                         const failedList = failedUploads.map(f => `• ${f.name}: ${f.error}`).join('\n');
                         alert(`The following files could not be uploaded:\n\n${failedList}\n\nThe clipboard was created but these files are missing.`);
@@ -58,11 +57,7 @@ export default function Home() {
                 }
                 setFiles([]);
                 setIsPublic(false);
-                await new Promise(resolve => setTimeout(resolve, 500));
-                await fetchClipboards();
-                setTimeout(() => {
-                    router.push(`/clipboard/${clipboardId}`);
-                }, 100);
+                router.push(`/clipboard/${clipboardId}`);
             } else {
                 alert('Failed to create clipboard: ' + data.error);
             }
