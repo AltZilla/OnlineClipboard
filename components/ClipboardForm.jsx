@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { useToast } from '@/components/Toast';
 export default function ClipboardForm({
     onSubmit,
     loading = false,
@@ -8,6 +9,7 @@ export default function ClipboardForm({
     initialValue = '',
 }) {
     const [content, setContent] = useState(initialValue);
+    const toast = useToast();
     const handleSubmit = (e) => {
         e.preventDefault();
         onSubmit(content);
@@ -15,10 +17,10 @@ export default function ClipboardForm({
     const handleCopyToClipboard = async () => {
         try {
             await navigator.clipboard.writeText(content);
-            alert('Content copied to clipboard!');
+            toast.success('Content copied to clipboard!');
         } catch (error) {
             console.error('Failed to copy to clipboard:', error);
-            alert('Failed to copy to clipboard');
+            toast.error('Failed to copy to clipboard');
         }
     };
     return (

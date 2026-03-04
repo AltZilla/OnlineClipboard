@@ -3,9 +3,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import QrCodeCard from '@/components/QrCodeCard';
 import ClipboardViewer from '@/components/ClipboardViewer';
+import { useToast } from '@/components/Toast';
 export default function ClipboardPage() {
     const params = useParams();
     const router = useRouter();
+    const toast = useToast();
     const id = params.id;
     const [clipboard, setClipboard] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -39,12 +41,12 @@ export default function ClipboardPage() {
     }, [id, fetchClipboard]);
     const handleCopyId = () => {
         navigator.clipboard.writeText(id);
-        alert('Clipboard ID copied to clipboard!');
+        toast.success('Clipboard ID copied!');
     };
     const handleShareUrl = () => {
         const url = window.location.href;
         navigator.clipboard.writeText(url);
-        alert('Share URL copied to clipboard!');
+        toast.success('Share URL copied!');
     };
     const formatDate = (dateString) => {
         try {

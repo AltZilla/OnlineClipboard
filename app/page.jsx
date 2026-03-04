@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ClipboardForm from '@/components/ClipboardForm';
 import FileUpload from '@/components/FileUpload';
+import { useToast } from '@/components/Toast';
 export default function Home() {
     const [clipboardId, setClipboardId] = useState('');
     const [loading, setLoading] = useState(false);
@@ -11,9 +12,10 @@ export default function Home() {
     const [loadingClipboards, setLoadingClipboards] = useState(true);
     const [isPublic, setIsPublic] = useState(false);
     const router = useRouter();
+    const toast = useToast();
     const handleCreateClipboard = async (content) => {
         if (!content.trim() && files.length === 0) {
-            alert('Please add text content or upload at least one file to create a clipboard.');
+            toast.warning('Please add text content or upload at least one file to create a clipboard.');
             return;
         }
         console.log('Creating clipboard with isPublic:', isPublic);
@@ -51,19 +53,19 @@ export default function Home() {
                     );
                     const failedUploads = uploadResults.filter(Boolean);
                     if (failedUploads.length > 0) {
-                        const failedList = failedUploads.map(f => `• ${f.name}: ${f.error}`).join('\n');
-                        alert(`The following files could not be uploaded:\n\n${failedList}\n\nThe clipboard was created but these files are missing.`);
+                        const failedList = failedUploads.map(f => `${f.name}: ${f.error}`).join(', ');
+                        toast.warning(`Some files failed to upload: ${failedList}`);
                     }
                 }
                 setFiles([]);
                 setIsPublic(false);
                 router.push(`/clipboard/${clipboardId}`);
             } else {
-                alert('Failed to create clipboard: ' + data.error);
+                toast.error('Failed to create clipboard: ' + data.error);
             }
         } catch (error) {
             console.error('Error creating clipboard:', error);
-            alert('Failed to create clipboard');
+            toast.error('Failed to create clipboard');
         } finally {
             setLoading(false);
         }

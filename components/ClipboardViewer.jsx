@@ -1,7 +1,9 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
+import { useToast } from '@/components/Toast';
 
 export default function ClipboardViewer({ clipboard }) {
+    const toast = useToast();
     const [translatedText, setTranslatedText] = useState(null);
     const [showTranslated, setShowTranslated] = useState(false);
     const [translating, setTranslating] = useState(false);
@@ -160,7 +162,7 @@ export default function ClipboardViewer({ clipboard }) {
             document.body.removeChild(a);
         } catch (error) {
             console.error('Error downloading file:', error);
-            alert('Failed to download file');
+            toast.error('Failed to download file');
         }
     };
 
@@ -168,10 +170,10 @@ export default function ClipboardViewer({ clipboard }) {
         try {
             const textToCopy = showTranslated && translatedText ? translatedText : clipboard.content;
             await navigator.clipboard.writeText(textToCopy);
-            alert('Text copied to clipboard!');
+            toast.success('Text copied to clipboard!');
         } catch (error) {
             console.error('Failed to copy text:', error);
-            alert('Failed to copy text');
+            toast.error('Failed to copy text');
         }
     };
 

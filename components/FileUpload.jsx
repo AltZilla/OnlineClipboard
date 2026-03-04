@@ -1,9 +1,11 @@
 'use client';
 import { useState, useRef } from 'react';
+import { useToast } from '@/components/Toast';
 export default function FileUpload({ onFileUpload }) {
     const [dragActive, setDragActive] = useState(false);
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef(null);
+    const toast = useToast();
     const handleDrag = (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -38,7 +40,7 @@ export default function FileUpload({ onFileUpload }) {
             }
         }
         if (oversizedFiles.length > 0) {
-            alert(`The following files exceed the 50MB limit and were skipped:\n${oversizedFiles.join('\n')}`);
+            toast.warning(`Files exceeding 50MB limit were skipped: ${oversizedFiles.join(', ')}`);
         }
         if (validFiles.length === 0) {
             return;
@@ -48,7 +50,7 @@ export default function FileUpload({ onFileUpload }) {
             onFileUpload(validFiles);
         } catch (error) {
             console.error('Error uploading files:', error);
-            alert('Failed to upload files');
+            toast.error('Failed to upload files');
         } finally {
             setUploading(false);
             if (fileInputRef.current) {
