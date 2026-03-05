@@ -32,25 +32,42 @@ export default function Home() {
             if (data.success) {
                 const clipboardId = data.clipboard.id;
                 if (files.length > 0) {
-                    const uploadResults = await Promise.all(
-                        files.map(async (file) => {
-                            const formData = new FormData();
-                            formData.append('file', file);
-                            try {
+                    const CHUNK_SIZE = 3 * 1024 * 1024; // 3MB chunks (under Vercel's 4.5MB limit)
+                    const uploadResults = [];
+
+                    for (const file of files) {
+                        try {
+                            const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+
+                            for (let i = 0; i < totalChunks; i++) {
+                                const start = i * CHUNK_SIZE;
+                                const end = Math.min(start + CHUNK_SIZE, file.size);
+                                const chunk = file.slice(start, end);
+
+                                const formData = new FormData();
+                                formData.append('file', chunk, file.name);
+                                formData.append('chunkIndex', i.toString());
+                                formData.append('totalChunks', totalChunks.toString());
+                                formData.append('fileName', file.name);
+                                formData.append('fileSize', file.size.toString());
+                                formData.append('mimeType', file.type || 'application/octet-stream');
+
                                 const uploadResponse = await fetch(`/api/clipboard/${clipboardId}/upload`, {
                                     method: 'POST',
                                     body: formData,
                                 });
+
                                 if (!uploadResponse.ok) {
                                     const errorData = await uploadResponse.json().catch(() => ({}));
-                                    return { name: file.name, error: errorData.error || `HTTP ${uploadResponse.status}` };
+                                    uploadResults.push({ name: file.name, error: errorData.error || `HTTP ${uploadResponse.status}` });
+                                    break; // Stop uploading chunks for this file
                                 }
-                                return null;
-                            } catch (uploadError) {
-                                return { name: file.name, error: uploadError instanceof Error ? uploadError.message : 'Network error' };
                             }
-                        })
-                    );
+                        } catch (uploadError) {
+                            uploadResults.push({ name: file.name, error: uploadError instanceof Error ? uploadError.message : 'Network error' });
+                        }
+                    }
+
                     const failedUploads = uploadResults.filter(Boolean);
                     if (failedUploads.length > 0) {
                         const failedList = failedUploads.map(f => `${f.name}: ${f.error}`).join(', ');
