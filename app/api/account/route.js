@@ -61,7 +61,7 @@ export async function POST(request) {
         const normalizedEmail = email.trim().toLowerCase();
 
         // Verify OTP
-        const isValid = verifyOtp(normalizedEmail, otp.trim());
+        const isValid = await verifyOtp(normalizedEmail, otp.trim());
         if (!isValid) {
             return NextResponse.json(
                 { success: false, error: 'Invalid or expired verification code. Please request a new one.' },

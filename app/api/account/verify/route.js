@@ -29,7 +29,7 @@ export async function POST(request) {
 
         const normalizedEmail = email.trim().toLowerCase();
         const otp = generateOtp();
-        storeOtp(normalizedEmail, otp);
+        await storeOtp(normalizedEmail, otp);
 
         await sendOtpEmail(normalizedEmail, otp);
 
