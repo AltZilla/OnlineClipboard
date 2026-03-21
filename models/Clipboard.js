@@ -41,7 +41,8 @@ const ClipboardSchema = new mongoose.Schema({
     timestamps: false
 });
 
-ClipboardSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+// TTL index removed to prevent orphaned GridFS files
+// Cleanup is handled manually by cleanupExpiredClipboards
 
 ClipboardSchema.pre('findOneAndUpdate', function () {
     this.set({ lastAccessed: new Date() });
