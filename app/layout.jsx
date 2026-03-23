@@ -4,7 +4,11 @@ import { ToastProvider } from '@/components/Toast'
 export const metadata = {
     title: 'Online Clipboard',
     description: 'Share text and files between devices with a unique ID',
+    verification: {
+        google: "uaULjIzsKp4Mz8U0n6P3SCXRgDXj-8FWJmNUpSYuE3s",
+    },
 }
+
 export default function RootLayout({ children }) {
     return (
         <html lang="en">
