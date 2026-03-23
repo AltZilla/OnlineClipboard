@@ -1,5 +1,6 @@
 import './globals.css'
 import { ToastProvider } from '@/components/Toast'
+import { Analytics } from '@vercel/analytics/next'
 
 export const metadata = {
     title: 'Online Clipboard',
@@ -27,6 +28,7 @@ export default function RootLayout({ children }) {
                         {children}
                     </main>
                 </ToastProvider>
+                <Analytics />
             </body>
         </html>
     )

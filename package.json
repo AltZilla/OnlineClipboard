@@ -12,6 +12,7 @@
     "@tsparticles/engine": "^3.9.1",
     "@tsparticles/preset-links": "^3.2.0",
     "@tsparticles/react": "^3.0.0",
+    "@vercel/analytics": "^2.0.1",
     "formidable": "^3.5.1",
     "mongodb": "^6.21.0",
     "mongoose": "^8.0.3",
