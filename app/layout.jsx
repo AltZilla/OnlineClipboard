@@ -3,6 +3,7 @@ import { ToastProvider } from '@/components/Toast'
 import { Analytics } from '@vercel/analytics/next'
 
 export const metadata = {
+    metadataBase: new URL('https://broomboard.vercel.app'),
     title: 'Online Clipboard',
     description: 'Share text and files between devices with a unique ID',
     verification: {
