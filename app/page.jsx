@@ -1,8 +1,9 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import ClipboardForm from '@/components/ClipboardForm';
 import FileUpload from '@/components/FileUpload';
+import UploadProgressModal from '@/components/UploadProgressModal';
 import { useToast } from '@/components/Toast';
 export default function Home() {
     const [clipboardId, setClipboardId] = useState('');
@@ -11,8 +12,191 @@ export default function Home() {
     const [clipboards, setClipboards] = useState([]);
     const [loadingClipboards, setLoadingClipboards] = useState(true);
     const [isPublic, setIsPublic] = useState(false);
+    const [uploadSession, setUploadSession] = useState(null);
+    const createdClipboardIdRef = useRef(null);
+    const failedFilesRef = useRef([]);
     const router = useRouter();
     const toast = useToast();
+
+    const CHUNK_SIZE = 3 * 1024 * 1024; // 3MB chunks
+    const MAX_CONCURRENT = 3;
+    const MAX_RETRIES = 2;
+    const RETRY_DELAYS = [500, 1500]; // ms backoff per retry
+
+    // Upload a single chunk with auto-retry
+    const uploadChunkWithRetry = async (clipboardId, chunk, chunkMeta, retries = MAX_RETRIES) => {
+        for (let attempt = 0; attempt <= retries; attempt++) {
+            try {
+                const formData = new FormData();
+                formData.append('file', chunk, chunkMeta.fileName);
+                formData.append('chunkIndex', chunkMeta.chunkIndex.toString());
+                formData.append('totalChunks', chunkMeta.totalChunks.toString());
+                formData.append('fileName', chunkMeta.fileName);
+                formData.append('fileSize', chunkMeta.fileSize.toString());
+                formData.append('mimeType', chunkMeta.mimeType);
+
+                const response = await fetch(`/api/clipboard/${clipboardId}/upload`, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    return { ok: true, data: await response.json().catch(() => null) };
+                }
+
+                // Non-retryable status codes (client errors)
+                if (response.status >= 400 && response.status < 500) {
+                    const errorData = await response.json().catch(() => ({}));
+                    return { ok: false, error: errorData.error || `HTTP ${response.status}` };
+                }
+
+                // Server error — retry if attempts remain
+                if (attempt < retries) {
+                    await new Promise(r => setTimeout(r, RETRY_DELAYS[attempt] || 1000));
+                    continue;
+                }
+
+                const errorData = await response.json().catch(() => ({}));
+                return { ok: false, error: errorData.error || `HTTP ${response.status} after ${retries + 1} attempts` };
+            } catch (err) {
+                if (attempt < retries) {
+                    await new Promise(r => setTimeout(r, RETRY_DELAYS[attempt] || 1000));
+                    continue;
+                }
+                return { ok: false, error: err instanceof Error ? err.message : 'Network error' };
+            }
+        }
+    };
+
+    // Core upload runner — used for initial upload and retry
+    const runFileUploads = useCallback(async (filesToUpload, clipboardId) => {
+        const uploadResults = [];
+
+        // Build session file entries
+        const sessionFiles = filesToUpload.map(f => ({
+            name: f.name,
+            size: f.size,
+            totalChunks: Math.ceil(f.size / CHUNK_SIZE),
+            chunksUploaded: 0,
+            status: 'pending',
+            errorMessage: null,
+        }));
+
+        // Compute baseOffset ONCE — stable for the lifetime of this run
+        let baseOffset = 0;
+        setUploadSession(prev => {
+            if (prev && prev.files) {
+                const doneFiles = prev.files.filter(f => f.status === 'done');
+                baseOffset = doneFiles.length;
+                return { files: [...doneFiles, ...sessionFiles], currentFileIndex: 0, isOpen: true };
+            }
+            baseOffset = 0;
+            return { files: sessionFiles, currentFileIndex: 0, isOpen: true };
+        });
+
+        // Small yield to ensure React processes the state update
+        await new Promise(r => setTimeout(r, 0));
+
+        const uploadSingleFile = async (file, localIndex) => {
+            const sessionIdx = baseOffset + localIndex;
+            try {
+                const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+
+                setUploadSession(prev => {
+                    const updated = [...prev.files];
+                    updated[sessionIdx] = { ...updated[sessionIdx], status: 'uploading' };
+                    return { ...prev, files: updated };
+                });
+
+                for (let i = 0; i < totalChunks; i++) {
+                    const start = i * CHUNK_SIZE;
+                    const end = Math.min(start + CHUNK_SIZE, file.size);
+                    const chunk = file.slice(start, end);
+
+                    const result = await uploadChunkWithRetry(clipboardId, chunk, {
+                        chunkIndex: i,
+                        totalChunks,
+                        fileName: file.name,
+                        fileSize: file.size,
+                        mimeType: file.type || 'application/octet-stream',
+                    });
+
+                    if (!result.ok) {
+                        uploadResults.push({ name: file.name, error: result.error });
+                        setUploadSession(prev => {
+                            const updated = [...prev.files];
+                            updated[sessionIdx] = { ...updated[sessionIdx], status: 'error', errorMessage: result.error };
+                            return { ...prev, files: updated };
+                        });
+                        return; // Stop chunks for this file
+                    }
+
+                    const chunksReceived = result.data?.chunksReceived ?? (i + 1);
+                    setUploadSession(prev => {
+                        const updated = [...prev.files];
+                        updated[sessionIdx] = {
+                            ...updated[sessionIdx],
+                            chunksUploaded: Math.min(chunksReceived, totalChunks),
+                        };
+                        return { ...prev, files: updated };
+                    });
+                }
+
+                // Mark done
+                setUploadSession(prev => {
+                    const updated = [...prev.files];
+                    if (updated[sessionIdx].status !== 'error') {
+                        updated[sessionIdx] = {
+                            ...updated[sessionIdx],
+                            status: 'done',
+                            chunksUploaded: updated[sessionIdx].totalChunks,
+                        };
+                    }
+                    return { ...prev, files: updated };
+                });
+            } catch (uploadError) {
+                const errorMsg = uploadError instanceof Error ? uploadError.message : 'Network error';
+                uploadResults.push({ name: file.name, error: errorMsg });
+                setUploadSession(prev => {
+                    const updated = [...prev.files];
+                    updated[sessionIdx] = { ...updated[sessionIdx], status: 'error', errorMessage: errorMsg };
+                    return { ...prev, files: updated };
+                });
+            }
+        };
+
+        // Concurrent pool
+        const pool = [];
+        for (let i = 0; i < filesToUpload.length; i++) {
+            const task = uploadSingleFile(filesToUpload[i], i);
+            pool.push(task);
+            if (pool.length >= MAX_CONCURRENT) {
+                await Promise.race(pool);
+                for (let p = pool.length - 1; p >= 0; p--) {
+                    const status = await Promise.race([pool[p].then(() => 'done'), Promise.resolve('pending')]);
+                    if (status === 'done') pool.splice(p, 1);
+                }
+            }
+        }
+        await Promise.all(pool);
+
+        // Store failed files for potential retry
+        const failedUploads = uploadResults.filter(Boolean);
+        const failedFileObjs = filesToUpload.filter(f =>
+            failedUploads.some(fu => fu.name === f.name)
+        );
+        failedFilesRef.current = failedFileObjs;
+
+        if (failedUploads.length === 0) {
+            // All succeeded — auto-navigate after brief pause
+            setFiles([]);
+            setIsPublic(false);
+            await new Promise(resolve => setTimeout(resolve, 1200));
+            setUploadSession(null);
+            router.push(`/clipboard/${clipboardId}`);
+        }
+        // If there are failures, modal stays open with retry/continue buttons
+    }, [router]);
     const handleCreateClipboard = async (content) => {
         if (!content.trim() && files.length === 0) {
             toast.warning('Please add text content or upload at least one file to create a clipboard.');
@@ -31,52 +215,14 @@ export default function Home() {
             const data = await response.json();
             if (data.success) {
                 const clipboardId = data.clipboard.id;
+                createdClipboardIdRef.current = clipboardId;
                 if (files.length > 0) {
-                    const CHUNK_SIZE = 3 * 1024 * 1024; // 3MB chunks (under Vercel's 4.5MB limit)
-                    const uploadResults = [];
-
-                    for (const file of files) {
-                        try {
-                            const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
-
-                            for (let i = 0; i < totalChunks; i++) {
-                                const start = i * CHUNK_SIZE;
-                                const end = Math.min(start + CHUNK_SIZE, file.size);
-                                const chunk = file.slice(start, end);
-
-                                const formData = new FormData();
-                                formData.append('file', chunk, file.name);
-                                formData.append('chunkIndex', i.toString());
-                                formData.append('totalChunks', totalChunks.toString());
-                                formData.append('fileName', file.name);
-                                formData.append('fileSize', file.size.toString());
-                                formData.append('mimeType', file.type || 'application/octet-stream');
-
-                                const uploadResponse = await fetch(`/api/clipboard/${clipboardId}/upload`, {
-                                    method: 'POST',
-                                    body: formData,
-                                });
-
-                                if (!uploadResponse.ok) {
-                                    const errorData = await uploadResponse.json().catch(() => ({}));
-                                    uploadResults.push({ name: file.name, error: errorData.error || `HTTP ${uploadResponse.status}` });
-                                    break; // Stop uploading chunks for this file
-                                }
-                            }
-                        } catch (uploadError) {
-                            uploadResults.push({ name: file.name, error: uploadError instanceof Error ? uploadError.message : 'Network error' });
-                        }
-                    }
-
-                    const failedUploads = uploadResults.filter(Boolean);
-                    if (failedUploads.length > 0) {
-                        const failedList = failedUploads.map(f => `${f.name}: ${f.error}`).join(', ');
-                        toast.warning(`Some files failed to upload: ${failedList}`);
-                    }
+                    await runFileUploads(files, clipboardId);
+                } else {
+                    setFiles([]);
+                    setIsPublic(false);
+                    router.push(`/clipboard/${clipboardId}`);
                 }
-                setFiles([]);
-                setIsPublic(false);
-                router.push(`/clipboard/${clipboardId}`);
             } else {
                 toast.error('Failed to create clipboard: ' + data.error);
             }
@@ -140,8 +286,45 @@ export default function Home() {
             ? content.substring(0, maxLength) + '...'
             : content;
     };
+    const handleUploadModalClose = () => {
+        setUploadSession(null);
+        failedFilesRef.current = [];
+    };
+
+    const handleRetryFailed = async () => {
+        const failedFiles = failedFilesRef.current;
+        const cbId = createdClipboardIdRef.current;
+        if (!failedFiles.length || !cbId) return;
+
+        // Remove error entries from session, keep done files
+        setUploadSession(prev => {
+            if (!prev) return prev;
+            const kept = prev.files.filter(f => f.status === 'done');
+            return { ...prev, files: kept };
+        });
+
+        await runFileUploads(failedFiles, cbId);
+    };
+
+    const handleContinueAnyway = () => {
+        const cbId = createdClipboardIdRef.current;
+        setUploadSession(null);
+        setFiles([]);
+        setIsPublic(false);
+        failedFilesRef.current = [];
+        if (cbId) {
+            router.push(`/clipboard/${cbId}`);
+        }
+    };
+
     return (
         <div className="home-container">
+            <UploadProgressModal
+                session={uploadSession}
+                onClose={handleUploadModalClose}
+                onRetry={handleRetryFailed}
+                onContinue={handleContinueAnyway}
+            />
             { }
             <div className="hero-section">
                 <div className="hero-card">

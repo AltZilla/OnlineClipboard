@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { addFileToClipboard, getClipboard, cleanupExpiredClipboards } from '@/lib/storage-mongodb';
+import { addFileToClipboard, checkClipboardExists, cleanupExpiredClipboards } from '@/lib/storage-mongodb';
 import { nanoid } from 'nanoid';
 import connectDB from '@/lib/mongodb';
 import TempChunk from '@/models/TempChunk';
@@ -19,8 +19,8 @@ export async function POST(request, { params }) {
 
         await cleanupExpiredClipboards();
 
-        const clipboard = await getClipboard(id);
-        if (!clipboard) {
+        const clipboardExists = await checkClipboardExists(id);
+        if (!clipboardExists) {
             return NextResponse.json(
                 { success: false, error: 'Clipboard not found' },
                 { status: 404 }
