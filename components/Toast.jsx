@@ -28,6 +28,7 @@ export function ToastProvider({ children }) {
     toast.success = useCallback((message, duration) => addToast(message, 'success', duration), [addToast]);
     toast.error = useCallback((message, duration) => addToast(message, 'error', duration), [addToast]);
     toast.warning = useCallback((message, duration) => addToast(message, 'warning', duration), [addToast]);
+    toast.info = useCallback((message, duration) => addToast(message, 'info', duration), [addToast]);
 
     return (
         <ToastContext.Provider value={toast}>

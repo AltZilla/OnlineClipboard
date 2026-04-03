@@ -25,6 +25,9 @@ export default function ClipboardViewer({ clipboard }) {
     const [emailResult, setEmailResult] = useState(null);
     const [emailError, setEmailError] = useState('');
 
+    // Download progress state: { [filename]: { progress, downloadedBytes, totalBytes, status, abortController } }
+    const [downloads, setDownloads] = useState({});
+
     const indianCodes = ['ta', 'hi', 'te', 'kn', 'ml', 'mr', 'bn', 'gu', 'pa', 'ur', 'or', 'ne', 'si'];
 
     const langCodeMap = {
@@ -145,24 +148,127 @@ export default function ClipboardViewer({ clipboard }) {
         }
     };
 
+    const handleCancelDownload = (filename) => {
+        const dl = downloads[filename];
+        if (dl && dl.abortController) {
+            dl.abortController.abort();
+        }
+        setDownloads(prev => {
+            const next = { ...prev };
+            delete next[filename];
+            return next;
+        });
+        toast.info('Download cancelled');
+    };
+
     const handleDownloadFile = async (filename, originalName) => {
+        // Prevent duplicate downloads
+        if (downloads[filename] && downloads[filename].status === 'downloading') return;
+
+        const abortController = new AbortController();
+
+        setDownloads(prev => ({
+            ...prev,
+            [filename]: { progress: 0, downloadedBytes: 0, totalBytes: 0, status: 'downloading', abortController }
+        }));
+
         try {
-            const response = await fetch(`/api/clipboard/${clipboard.id}/file/${filename}`);
+            const response = await fetch(`/api/clipboard/${clipboard.id}/file/${filename}`, {
+                signal: abortController.signal
+            });
             if (!response.ok) {
                 throw new Error('Failed to download file');
             }
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = originalName;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
+
+            const contentLength = response.headers.get('Content-Length');
+            const totalBytes = contentLength ? parseInt(contentLength, 10) : 0;
+
+            // Update totalBytes
+            setDownloads(prev => ({
+                ...prev,
+                [filename]: { ...prev[filename], totalBytes }
+            }));
+
+            // If the browser supports ReadableStream, track progress
+            if (response.body && typeof response.body.getReader === 'function' && totalBytes > 0) {
+                const reader = response.body.getReader();
+                const chunks = [];
+                let downloadedBytes = 0;
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    chunks.push(value);
+                    downloadedBytes += value.length;
+                    const progress = Math.round((downloadedBytes / totalBytes) * 100);
+
+                    setDownloads(prev => ({
+                        ...prev,
+                        [filename]: { ...prev[filename], progress, downloadedBytes, status: 'downloading' }
+                    }));
+                }
+
+                // Combine chunks into a single blob
+                const blob = new Blob(chunks);
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = originalName;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } else {
+                // Fallback if no stream support or no content-length
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = originalName;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            }
+
+            // Mark download as complete
+            setDownloads(prev => ({
+                ...prev,
+                [filename]: { ...prev[filename], progress: 100, status: 'complete' }
+            }));
+
+            toast.success(`Downloaded ${originalName}`);
+
+            // Clear download state after a brief delay
+            setTimeout(() => {
+                setDownloads(prev => {
+                    const next = { ...prev };
+                    delete next[filename];
+                    return next;
+                });
+            }, 2500);
+
         } catch (error) {
+            if (error.name === 'AbortError') {
+                // User cancelled — already handled
+                return;
+            }
             console.error('Error downloading file:', error);
+            setDownloads(prev => ({
+                ...prev,
+                [filename]: { ...prev[filename], progress: 0, status: 'error' }
+            }));
             toast.error('Failed to download file');
+
+            // Clear error state after a delay
+            setTimeout(() => {
+                setDownloads(prev => {
+                    const next = { ...prev };
+                    delete next[filename];
+                    return next;
+                });
+            }, 3000);
         }
     };
 
@@ -487,31 +593,83 @@ export default function ClipboardViewer({ clipboard }) {
                 </h3>
                 {clipboard.files && clipboard.files.length > 0 ? (
                     <div className="viewer-files-list">
-                        {clipboard.files.map((file, index) => (
-                            <div
-                                key={index}
-                                className="viewer-file-item"
-                                style={{ animationDelay: `${index * 0.1}s` }}
-                            >
-                                <div className="viewer-file-info">
-                                    <div className="file-icon-large" style={{ animationDelay: `${index * 0.2}s` }}>
-                                        {getFileIcon(file.originalName)}
-                                    </div>
-                                    <div className="viewer-file-details">
-                                        <p className="viewer-filename">{file.originalName}</p>
-                                        <p className="viewer-file-meta">
-                                            {formatFileSize(file.size)} • Uploaded {formatDate(file.uploadTime)}
-                                        </p>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => handleDownloadFile(file.filename, file.originalName)}
-                                    className="btn-download"
+                        {clipboard.files.map((file, index) => {
+                            const dl = downloads[file.filename];
+                            const isDownloading = dl && dl.status === 'downloading';
+                            const isComplete = dl && dl.status === 'complete';
+                            const isError = dl && dl.status === 'error';
+
+                            return (
+                                <div
+                                    key={index}
+                                    className={`viewer-file-item ${isDownloading ? 'file-item-downloading' : ''} ${isComplete ? 'file-item-complete' : ''} ${isError ? 'file-item-error' : ''}`}
+                                    style={{ animationDelay: `${index * 0.1}s` }}
                                 >
-                                    📥
-                                </button>
-                            </div>
-                        ))}
+                                    <div className="viewer-file-info">
+                                        <div className="file-icon-large" style={{ animationDelay: `${index * 0.2}s` }}>
+                                            {isDownloading ? (
+                                                <span className="dl-spinner-icon">⏳</span>
+                                            ) : isComplete ? (
+                                                <span className="dl-complete-icon">✅</span>
+                                            ) : isError ? (
+                                                <span className="dl-error-icon">❌</span>
+                                            ) : (
+                                                getFileIcon(file.originalName)
+                                            )}
+                                        </div>
+                                        <div className="viewer-file-details">
+                                            <p className="viewer-filename">{file.originalName}</p>
+                                            {isDownloading ? (
+                                                <p className="viewer-file-meta dl-progress-text">
+                                                    {dl.totalBytes > 0
+                                                        ? `${formatFileSize(dl.downloadedBytes)} / ${formatFileSize(dl.totalBytes)} — ${dl.progress}%`
+                                                        : 'Downloading...'
+                                                    }
+                                                </p>
+                                            ) : isComplete ? (
+                                                <p className="viewer-file-meta dl-complete-text">Download complete!</p>
+                                            ) : isError ? (
+                                                <p className="viewer-file-meta dl-error-text">Download failed</p>
+                                            ) : (
+                                                <p className="viewer-file-meta">
+                                                    {formatFileSize(file.size)} • Uploaded {formatDate(file.uploadTime)}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Download progress bar */}
+                                    {isDownloading && (
+                                        <div className="dl-progress-bar-container">
+                                            <div
+                                                className="dl-progress-bar-fill"
+                                                style={{ width: `${dl.progress}%` }}
+                                            />
+                                        </div>
+                                    )}
+
+                                    {/* Action buttons */}
+                                    {isDownloading ? (
+                                        <button
+                                            onClick={() => handleCancelDownload(file.filename)}
+                                            className="btn-download btn-cancel-download"
+                                            title="Cancel download"
+                                        >
+                                            ✕
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={() => handleDownloadFile(file.filename, file.originalName)}
+                                            className="btn-download"
+                                            disabled={isComplete}
+                                            title="Download file"
+                                        >
+                                            📥
+                                        </button>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 ) : (
                     <div className="viewer-empty">
