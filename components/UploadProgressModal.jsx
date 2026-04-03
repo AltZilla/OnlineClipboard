@@ -2,9 +2,9 @@
 import { useState } from 'react';
 
 export default function UploadProgressModal({ session, onClose, onRetry, onContinue }) {
-    if (!session || !session.isOpen) return null;
-
     const [showCompleted, setShowCompleted] = useState(false);
+
+    if (!session || !session.isOpen) return null;
 
     const { files } = session;
 

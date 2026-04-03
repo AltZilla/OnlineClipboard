@@ -5,6 +5,56 @@ import ClipboardForm from '@/components/ClipboardForm';
 import FileUpload from '@/components/FileUpload';
 import UploadProgressModal from '@/components/UploadProgressModal';
 import { useToast } from '@/components/Toast';
+const CHUNK_SIZE = 3 * 1024 * 1024; // 3MB chunks
+const MAX_CONCURRENT = 3;
+const MAX_RETRIES = 2;
+const RETRY_DELAYS = [500, 1500]; // ms backoff per retry
+
+// Upload a single chunk with auto-retry
+const uploadChunkWithRetry = async (clipboardId, chunk, chunkMeta, retries = MAX_RETRIES) => {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+            const formData = new FormData();
+            formData.append('file', chunk, chunkMeta.fileName);
+            formData.append('chunkIndex', chunkMeta.chunkIndex.toString());
+            formData.append('totalChunks', chunkMeta.totalChunks.toString());
+            formData.append('fileName', chunkMeta.fileName);
+            formData.append('fileSize', chunkMeta.fileSize.toString());
+            formData.append('mimeType', chunkMeta.mimeType);
+
+            const response = await fetch(`/api/clipboard/${clipboardId}/upload`, {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (response.ok) {
+                return { ok: true, data: await response.json().catch(() => null) };
+            }
+
+            // Non-retryable status codes (client errors)
+            if (response.status >= 400 && response.status < 500) {
+                const errorData = await response.json().catch(() => ({}));
+                return { ok: false, error: errorData.error || `HTTP ${response.status}` };
+            }
+
+            // Server error — retry if attempts remain
+            if (attempt < retries) {
+                await new Promise(r => setTimeout(r, RETRY_DELAYS[attempt] || 1000));
+                continue;
+            }
+
+            const errorData = await response.json().catch(() => ({}));
+            return { ok: false, error: errorData.error || `HTTP ${response.status} after ${retries + 1} attempts` };
+        } catch (err) {
+            if (attempt < retries) {
+                await new Promise(r => setTimeout(r, RETRY_DELAYS[attempt] || 1000));
+                continue;
+            }
+            return { ok: false, error: err instanceof Error ? err.message : 'Network error' };
+        }
+    }
+};
+
 export default function Home() {
     const [clipboardId, setClipboardId] = useState('');
     const [loading, setLoading] = useState(false);
@@ -17,56 +67,6 @@ export default function Home() {
     const failedFilesRef = useRef([]);
     const router = useRouter();
     const toast = useToast();
-
-    const CHUNK_SIZE = 3 * 1024 * 1024; // 3MB chunks
-    const MAX_CONCURRENT = 3;
-    const MAX_RETRIES = 2;
-    const RETRY_DELAYS = [500, 1500]; // ms backoff per retry
-
-    // Upload a single chunk with auto-retry
-    const uploadChunkWithRetry = async (clipboardId, chunk, chunkMeta, retries = MAX_RETRIES) => {
-        for (let attempt = 0; attempt <= retries; attempt++) {
-            try {
-                const formData = new FormData();
-                formData.append('file', chunk, chunkMeta.fileName);
-                formData.append('chunkIndex', chunkMeta.chunkIndex.toString());
-                formData.append('totalChunks', chunkMeta.totalChunks.toString());
-                formData.append('fileName', chunkMeta.fileName);
-                formData.append('fileSize', chunkMeta.fileSize.toString());
-                formData.append('mimeType', chunkMeta.mimeType);
-
-                const response = await fetch(`/api/clipboard/${clipboardId}/upload`, {
-                    method: 'POST',
-                    body: formData,
-                });
-
-                if (response.ok) {
-                    return { ok: true, data: await response.json().catch(() => null) };
-                }
-
-                // Non-retryable status codes (client errors)
-                if (response.status >= 400 && response.status < 500) {
-                    const errorData = await response.json().catch(() => ({}));
-                    return { ok: false, error: errorData.error || `HTTP ${response.status}` };
-                }
-
-                // Server error — retry if attempts remain
-                if (attempt < retries) {
-                    await new Promise(r => setTimeout(r, RETRY_DELAYS[attempt] || 1000));
-                    continue;
-                }
-
-                const errorData = await response.json().catch(() => ({}));
-                return { ok: false, error: errorData.error || `HTTP ${response.status} after ${retries + 1} attempts` };
-            } catch (err) {
-                if (attempt < retries) {
-                    await new Promise(r => setTimeout(r, RETRY_DELAYS[attempt] || 1000));
-                    continue;
-                }
-                return { ok: false, error: err instanceof Error ? err.message : 'Network error' };
-            }
-        }
-    };
 
     // Core upload runner — used for initial upload and retry
     const runFileUploads = useCallback(async (filesToUpload, clipboardId) => {
