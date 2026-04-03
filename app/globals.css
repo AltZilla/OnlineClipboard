@@ -1292,6 +1292,147 @@ body::before {
   transform: translateY(-1px);
 }
 
+.btn-download:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== Download Progress Styles ===== */
+
+.viewer-file-item {
+  position: relative;
+  overflow: hidden;
+  flex-wrap: wrap;
+  transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.file-item-downloading {
+  border-color: var(--blue-400);
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.file-item-complete {
+  border-color: var(--green-400);
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.15);
+}
+
+.file-item-error {
+  border-color: var(--red-400);
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15);
+}
+
+/* Progress bar */
+.dl-progress-bar-container {
+  width: 100%;
+  height: 6px;
+  background: var(--blue-200);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 0.25rem;
+  flex-basis: 100%;
+  order: 10;
+}
+
+.dl-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue-400), var(--blue-600));
+  border-radius: 999px;
+  transition: width 0.15s ease-out;
+  position: relative;
+}
+
+.dl-progress-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  animation: dlShimmer 1.5s infinite;
+}
+
+@keyframes dlShimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Download status text */
+.dl-progress-text {
+  color: var(--blue-700) !important;
+  font-weight: 700 !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.dl-complete-text {
+  color: var(--green-600) !important;
+  font-weight: 700 !important;
+}
+
+.dl-error-text {
+  color: var(--red-500) !important;
+  font-weight: 700 !important;
+}
+
+/* Animated icon states */
+.dl-spinner-icon {
+  display: inline-block;
+  animation: dlPulse 1s ease-in-out infinite;
+}
+
+@keyframes dlPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.9); }
+}
+
+.dl-complete-icon {
+  display: inline-block;
+  animation: dlPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes dlPopIn {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.dl-error-icon {
+  display: inline-block;
+  animation: dlShake 0.5s ease;
+}
+
+@keyframes dlShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
+/* Cancel button */
+.btn-cancel-download {
+  background: #fef2f2 !important;
+  border-color: var(--red-400) !important;
+  color: var(--red-600) !important;
+  font-size: 1rem !important;
+  padding: 0.5rem 1rem !important;
+}
+
+.btn-cancel-download:hover {
+  background: #fee2e2 !important;
+  border-color: var(--red-500) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(239, 68, 68, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
 .btn-copy-text {
   background: #fffef7;
   border: 2px solid #333;

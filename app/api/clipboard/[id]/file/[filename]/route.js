@@ -21,6 +21,7 @@ export async function GET(request, { params }) {
         const blob = new Blob([Uint8Array.from(buffer)], { type: mimeType });
         const headers = new Headers();
         headers.set('Content-Type', mimeType);
+        headers.set('Content-Length', String(buffer.length));
         headers.set('Content-Disposition', `attachment; filename="${originalName}"`);
         return new NextResponse(blob, { status: 200, headers });
     } catch (error) {
