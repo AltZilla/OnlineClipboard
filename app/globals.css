@@ -661,6 +661,30 @@ body::before {
   margin-top: -1.5rem;
 }
 
+.faq-feature-chip-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin: -0.25rem auto 1rem;
+  max-width: 36rem;
+  position: relative;
+  z-index: 1;
+}
+
+.feature-chip {
+  background: var(--green-100);
+  border: 2px solid var(--green-300);
+  border-radius: 8px;
+  color: var(--blue-900);
+  font-family: 'Kalam', cursive;
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.2;
+  padding: 0.3rem 0.7rem;
+}
+
 .quick-questions-button {
   background: var(--yellow-100);
   border: 2px solid var(--yellow-300);
@@ -687,11 +711,21 @@ body::before {
   display: flex;
   justify-content: center;
   left: 0;
+  opacity: 0;
   padding: 1.5rem;
+  pointer-events: none;
   position: fixed;
   right: 0;
   top: 0;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+  visibility: hidden;
   z-index: 80;
+}
+
+.faq-modal-backdrop-open {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
 }
 
 .faq-modal-panel {

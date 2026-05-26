@@ -181,7 +181,7 @@ export default function AccountPage() {
             </div>
 
             <p className="hero-subtitle">
-                Create an account to receive clipboard content directly in your inbox
+                Send clipboard content to email with a verified 6-digit Account ID
             </p>
 
             <div className="dashboard-grid">
@@ -195,8 +195,8 @@ export default function AccountPage() {
                     </div>
 
                     <p className="account-description">
-                        Register your email to get a unique 6-digit Account ID. We&apos;ll verify
-                        your email with a one-time code first.
+                        Register your inbox, complete OTP verification, and get a 6-digit Account ID
+                        for Online Clipboard email delivery.
                     </p>
 
                     {/* Step 1: Enter Email */}
@@ -367,7 +367,7 @@ export default function AccountPage() {
                     </div>
 
                     <p className="account-description">
-                        Enter a 6-digit Account ID to check if it exists and see the linked email.
+                        Enter a 6-digit Account ID to confirm inbox delivery is ready for clipboard content.
                     </p>
 
                     <form onSubmit={handleLookup} className="account-form">
