@@ -651,6 +651,118 @@ body::before {
   animation-delay: 0.2s;
 }
 
+.home-action-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+  margin-top: -1.5rem;
+}
+
+.quick-questions-button {
+  background: var(--yellow-100);
+  border: 2px solid var(--yellow-300);
+  border-radius: 8px;
+  color: var(--blue-900);
+  cursor: pointer;
+  display: inline-block;
+  font-family: 'Kalam', cursive;
+  font-size: 1.05rem;
+  font-weight: 700;
+  padding: 0.5rem 1.25rem;
+  transition: all 0.2s;
+}
+
+.quick-questions-button:hover {
+  background: #fef08a;
+  transform: translateY(-1px);
+}
+
+.faq-modal-backdrop {
+  align-items: center;
+  background: rgba(15, 23, 42, 0.28);
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  padding: 1.5rem;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 80;
+}
+
+.faq-modal-panel {
+  max-height: calc(100vh - 3rem);
+  max-width: 42rem;
+  overflow-y: auto;
+  width: min(100%, 42rem);
+}
+
+.faq-modal-header {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.faq-modal-title {
+  font-size: 1.65rem;
+  line-height: 2rem;
+}
+
+.faq-modal-close {
+  align-items: center;
+  background: var(--red-50);
+  border: 2px solid var(--red-500);
+  border-radius: 8px;
+  color: var(--blue-900);
+  cursor: pointer;
+  display: flex;
+  font-family: 'Kalam', cursive;
+  font-size: 1.1rem;
+  font-weight: 700;
+  height: 2.25rem;
+  justify-content: center;
+  line-height: 1;
+  width: 2.25rem;
+}
+
+.faq-modal-list {
+  display: grid;
+  gap: 0.75rem;
+  position: relative;
+  z-index: 1;
+}
+
+.faq-modal-item {
+  background: var(--blue-50);
+  border: 2px solid var(--blue-200);
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+}
+
+.faq-modal-item h3 {
+  color: var(--blue-900);
+  font-family: 'Kalam', cursive;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.35;
+  margin-bottom: 0.35rem;
+}
+
+.faq-modal-item p {
+  color: var(--blue-800);
+  font-family: 'Kalam', cursive;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
 .card-header {
   display: flex;
   align-items: center;

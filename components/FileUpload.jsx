@@ -108,7 +108,7 @@ export default function FileUpload({ onFileUpload }) {
                 <ul className="guidelines-list">
                     <li>• Maximum file size: 50MB</li>
                     <li>• Supported formats: All file types</li>
-                    <li>• Files are stored securely and expire after 24 hours</li>
+                    <li>• Files up to 50MB are attached to your temporary clipboard and expire after 24 hours.</li>
                     <li>• Use descriptive filenames for easier identification</li>
                 </ul>
             </div>

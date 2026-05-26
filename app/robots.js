@@ -1,3 +1,5 @@
+import { absoluteUrl } from '@/lib/seo'
+
 export default function robots() {
   return {
     rules: {
@@ -5,6 +7,6 @@ export default function robots() {
       allow: '/',
       disallow: ['/api/', '/clipboard/'],
     },
-    sitemap: 'https://broomboard.vercel.app/sitemap.xml',
+    sitemap: absoluteUrl('/sitemap.xml'),
   }
 }

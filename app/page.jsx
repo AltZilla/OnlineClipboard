@@ -1,9 +1,10 @@
 import HomePageClient from '@/components/HomePageClient'
+import { absoluteUrl, siteName } from '@/lib/seo'
 
 export const metadata = {
-  title: 'Online Clipboard for Sharing Text, Files, and Email Delivery',
+  title: 'Online Clipboard - Share Text and Files Between Devices',
   description:
-    'Create private clipboards to share text and files across devices, and optionally send clipboard content directly to an email inbox.',
+    'Use a temporary online clipboard to share text and files between devices with a 4-digit ID, 24-hour expiry, and optional email delivery.',
   alternates: {
     canonical: '/',
   },
@@ -13,16 +14,35 @@ export const metadata = {
     'email clipboard contents automatically',
     'temporary online clipboard for phone and pc',
   ],
+  openGraph: {
+    title: 'Online Clipboard - Share Text and Files Between Devices',
+    description:
+      'Create a temporary online clipboard for text, files, and email delivery.',
+    url: absoluteUrl('/'),
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Online Clipboard - Share Text and Files Between Devices',
+    description:
+      'Create a temporary online clipboard for text, files, and email delivery.',
+  },
 }
 
 const jsonLd = {
   '@context': 'https://schema.org',
-  '@type': 'WebSite',
-  name: 'Online Clipboard',
-  url: 'https://broomboard.vercel.app',
+  '@type': 'WebApplication',
+  name: siteName,
+  url: absoluteUrl('/'),
+  applicationCategory: 'UtilitiesApplication',
+  operatingSystem: 'Any',
   description:
-    'Online clipboard for sharing text/files between devices and optionally sending clipboard content to email inboxes.',
-  inLanguage: 'en-US',
+    'Temporary online clipboard for sharing text and files between devices with a 4-digit ID, 24-hour expiry, and optional email delivery.',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
 }
 
 export default function Page() {

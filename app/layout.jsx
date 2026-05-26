@@ -1,39 +1,33 @@
 import './globals.css'
 import { ToastProvider } from '@/components/Toast'
 import { Analytics } from '@vercel/analytics/next'
-
-const siteUrl = 'https://broomboard.vercel.app'
-const siteDescription =
-  'Online clipboard to share text and files between devices, with optional email inbox delivery.'
+import { defaultSiteDescription, siteName, siteUrl } from '@/lib/seo'
 
 export const metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'Online Clipboard',
-    template: '%s | Online Clipboard',
+    default: siteName,
+    template: `%s | ${siteName}`,
   },
-  description: siteDescription,
-  applicationName: 'Online Clipboard',
+  description: defaultSiteDescription,
+  applicationName: siteName,
   keywords: [
     'private online clipboard with file upload',
     'share notes and files between phone and laptop',
     'send clipboard text to email inbox',
   ],
-  alternates: {
-    canonical: '/',
-  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: siteUrl,
-    siteName: 'Online Clipboard',
-    title: 'Online Clipboard',
-    description: siteDescription,
+    siteName,
+    title: siteName,
+    description: defaultSiteDescription,
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Online Clipboard',
-    description: siteDescription,
+    title: siteName,
+    description: defaultSiteDescription,
   },
   verification: {
     google: 'uaULjIzsKp4Mz8U0n6P3SCXRgDXj-8FWJmNUpSYuE3s',

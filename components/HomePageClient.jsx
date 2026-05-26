@@ -11,6 +11,25 @@ const MAX_CONCURRENT = 3;
 const MAX_RETRIES = 2;
 const RETRY_DELAYS = [500, 1500]; // ms backoff per retry
 
+const faqItems = [
+    {
+        question: 'What is an online clipboard?',
+        answer: 'It lets you create a temporary clipboard and open it on another device with a short ID.',
+    },
+    {
+        question: 'Can I upload files?',
+        answer: 'Yes, files up to 50MB can be attached while creating a clipboard.',
+    },
+    {
+        question: 'How long does a clipboard last?',
+        answer: 'Clipboards and attached files expire after 24 hours.',
+    },
+    {
+        question: 'Can I send clipboard content to email?',
+        answer: 'Yes, create an Email Account ID and send an active clipboard to your inbox.',
+    },
+];
+
 // Upload a single chunk with auto-retry
 const uploadChunkWithRetry = async (clipboardId, chunk, chunkMeta, retries = MAX_RETRIES) => {
     for (let attempt = 0; attempt <= retries; attempt++) {
@@ -64,6 +83,7 @@ export default function HomePageClient() {
     const [loadingClipboards, setLoadingClipboards] = useState(true);
     const [isPublic, setIsPublic] = useState(false);
     const [uploadSession, setUploadSession] = useState(null);
+    const [showFaq, setShowFaq] = useState(false);
     const createdClipboardIdRef = useRef(null);
     const failedFilesRef = useRef([]);
     const router = useRouter();
@@ -326,6 +346,37 @@ export default function HomePageClient() {
                 onRetry={handleRetryFailed}
                 onContinue={handleContinueAnyway}
             />
+            {showFaq && (
+                <div className="faq-modal-backdrop" role="presentation" onClick={() => setShowFaq(false)}>
+                    <div
+                        className="clipboard-card faq-modal-panel"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="quick-questions-title"
+                        onClick={(event) => event.stopPropagation()}
+                    >
+                        <div className="faq-modal-header">
+                            <h2 id="quick-questions-title" className="card-title faq-modal-title">Quick Questions</h2>
+                            <button
+                                type="button"
+                                className="faq-modal-close"
+                                onClick={() => setShowFaq(false)}
+                                aria-label="Close quick questions"
+                            >
+                                x
+                            </button>
+                        </div>
+                        <div className="faq-modal-list">
+                            {faqItems.map((item) => (
+                                <div key={item.question} className="faq-modal-item">
+                                    <h3>{item.question}</h3>
+                                    <p>{item.answer}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
             { }
             <div className="hero-section">
                 <div className="hero-card">
@@ -336,10 +387,9 @@ export default function HomePageClient() {
             </div>
             { }
             <p className="hero-subtitle">
-                Share text and files between devices with a unique ID
+                Share text and files between devices with a temporary 4-digit clipboard ID
             </p>
-            {/* Account link */}
-            <div style={{ textAlign: 'center', marginBottom: '2rem', marginTop: '-1.5rem' }}>
+            <div className="home-action-row">
                 <a
                     href="/account"
                     className="account-home-link"
@@ -359,8 +409,18 @@ export default function HomePageClient() {
                     onMouseOver={(e) => { e.target.style.background = '#dbeafe'; e.target.style.transform = 'translateY(-1px)'; }}
                     onMouseOut={(e) => { e.target.style.background = '#eff6ff'; e.target.style.transform = 'translateY(0)'; }}
                 >
-                    📧 Email Account — Get clipboard content delivered to your inbox
+                    Email Account - Send clipboard content to your inbox
                 </a>
+                <button
+                    type="button"
+                    className="quick-questions-button"
+                    onClick={() => setShowFaq(true)}
+                    aria-haspopup="dialog"
+                    aria-label="Quick Questions"
+                    title="Quick Questions"
+                >
+                    ❓
+                </button>
             </div>
             <div className="dashboard-grid">
                 { }
